@@ -1,0 +1,489 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Registration Form</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="~/assets/img/fav Crowe.png" rel="icon">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+
+    <!-- Vendor CSS Files -->
+    <link href="~/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Template Main CSS File -->
+    <link href="~/assets/css/Crowe.css" rel="stylesheet" />
+    <link href="~/assets/css/style.css" rel="stylesheet">
+    <link href="~/assets/css/CustomCss.css" rel="stylesheet" />
+    <link href="~/assets/css/sweet-alert.css" rel="stylesheet" />
+</head>
+<body>
+    <main id="main" class="main">
+        <div class="container" id="form">
+            <div class="form-container pt-5">
+                <h3 class="text-center mb-5 text-black">Registration Form</h3>
+
+                <form id="contactForm" enctype="multipart/form-data">
+                    <!-- Profile -->
+                    <div class="row mb-3 ">
+                        <div class="col-md-6">
+                            <div class="col-md-2 mb-2">
+                                <span class="badge-services">Profile</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <!-- Profile Picture -->
+                                <label for="profilepic" class="alum-label profilepic-label">Profile Picture</label>
+                                <div class="profile-img-box">
+                                    <span class="spn" id="profile-pic">Add Picture</span>
+                                    <input type="file" id="profilepic" name="profilepic" accept="image/*" class="file-input">
+                                </div>
+
+                                <!-- LIVE PREVIEW -->
+                                <div class="mt-2">
+                                    <img id="profilePreview" alt="Profile preview" style="display:none; max-width:140px; max-height:140px; border-radius:8px; border:1px solid #ddd;" />
+                                    <button type="button" id="clearProfilePic" class="btn btn-sm btn-outline-secondary" style="display:none; margin-left:8px;">Remove</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="title" class="alum-label">Title*</label>
+                                <select class="form-select" id="title" name="title" required>
+                                    <option value="" disabled selected hidden>Select</option>
+                                    <option value="mr">Mr</option>
+                                    <option value="ms">Ms</option>
+                                    <option value="mrs">Mrs</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="fullName" class="alum-label">First Name*</label>
+                                <input type="text" class="form-control" id="fullName" name="fullname" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="lastname" class="alum-label">Last Name*</label>
+                                <input type="text" class="form-control" id="lastname" name="lastname" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="dob" class="alum-label">Date of Birth*</label>
+                                <input type="date" class="form-control" id="dob" name="dob" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="memberStatus" class="alum-label">Member*</label>
+                                <select class="form-select" id="memberStatus" name="memberStatus" required>
+                                    <option value="" disabled selected hidden>Select</option>
+                                    <!-- options populated by JS -->
+                                </select>
+
+                                <!-- Add custom member field -->
+                                <div id="memberAddBox" class="org-add-box" style="display:none; gap:8px; margin-top:6px;">
+                                    <input type="text" id="newMemberInput" placeholder="Type your membership (e.g., PIPFA, CPA)">
+                                    <button type="button" id="addMemberBtn">Add</button>
+                                </div>
+                                <div id="memberError" class="error-popup"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="qualification" class="alum-label">Qualification*</label>
+                                <select class="form-select" id="qualification" name="qualification" required>
+                                    <option value="" disabled selected hidden>Select</option>
+                                    <!-- JS will populate -->
+                                </select>
+
+                                <!-- Add custom degree (auto-opens when "Other" is selected) -->
+                                <div id="qualAddBox" class="org-add-box" style="display:none; gap:8px; margin-top:6px;">
+                                    <input type="text" id="newQualificationInput" placeholder="Type your degree (e.g., BS Data Science)">
+                                    <button type="button" id="addQualificationBtn">Add</button>
+                                </div>
+                                <div id="qualError" class="error-popup" style="display:none;color:#b00020;margin-top:5px;font-size:.9rem;"></div>
+                                @* <label for="qualification" class="alum-label">Qualification</label>
+                                <select class="form-select" id="qualification" name="qualification" required>
+                                    <option value="" disabled selected hidden>Select</option>
+                                    <option value="FSC">FSC</option>
+                                    <option value="ICS">ICS</option>
+                                    <option value="BS">BS</option>
+                                    <option value="MS">MS</option>
+                                </select> *@
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="BG" class="alum-label">Blood Group</label>
+                                <select class="form-select" id="BG" name="bloodgroup">
+                                    <option value="" disabled selected hidden>Select</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A−">A−</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B−">B−</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB−">AB−</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O−">O−</option>
+                                    <option value="Other">Other</option>
+                                </select>
+
+                                <!-- hidden input for "Other" -->
+                                <div id="bloodAddBox" style="display:none; margin-top:6px;">
+                                    <input type="text" id="customBlood" class="form-control" placeholder="Enter your blood group">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="cnic" class="alum-label">CNIC</label>
+                                <input type="text" class="form-control" id="cnic" name="cnic">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Home Address -->
+                    <div class="col-md-3 mb-2"><span class="badge-services">Home Address</span></div>
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="address" class="alum-label">Address*</label>
+                                <input type="text" class="form-control" id="address" name="address" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="ZIP" class="alum-label">PostCode/ZIP</label>
+                                <input type="text" class="form-control" id="ZIP" name="ZIP">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="homeCountry" class="alum-label">Country</label>
+                                <select class="form-select" id="homeCountry" name="country">
+                                    <option value="" disabled selected hidden>Select</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="homeCity" class="alum-label">City</label>
+                                <select class="form-select" id="homeCity" name="homeCity">
+                                    <option value="" disabled selected hidden>Select</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="mobileNumber" class="alum-label">Mobile Number</label>
+                                <input type="text" class="form-control" id="mobileNumber" name="MobileNumber">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="emaiaddress" class="alum-label">Email Address*</label>
+                                <input type="email" class="form-control" id="emaiaddress" name="EmailAddress" required autocomplete="email">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="landLine1" class="alum-label">LandLine1</label>
+                                <input type="text" class="form-control" id="landLine1" name="landline1">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="landLine2" class="alum-label">LandLine2</label>
+                                <input type="text" class="form-control" id="landLine2" name="LandLine2">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="faxNumber" class="alum-label">Fax Number</label>
+                                <input type="text" class="form-control" id="personalfaxNumber" name="FaxNumber">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="LinkedIn" class="alum-label">LinkedIn</label>
+                                <input type="text" class="form-control" id="LinkedIn" name="LinkedIn">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="empStatus" class="alum-label">Employment Status*</label>
+                                    <select class="form-select" id="empStatus" name="empstatus" required>
+                                        <option value="" disabled selected hidden>Select</option>
+                                        <option value="Employed">Employed</option>
+                                        <option value="Practicing">Practicing</option>
+                                        <option value="Retired">Retired</option>
+                                        <option value="Business">Business</option>
+                                        <option value="UnEmployed">UnEmployed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Login Details -->
+                    <div class="col-md-2 mb-2"><span class="badge-services">Login Details</span></div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="password" class="alum-label">Password*</label>
+                                <input type="password" class="form-control" id="password" name="password" required autocomplete="new-password">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="cnfrmpassword" class="alum-label">Confirm Password*</label>
+                                <input type="password" class="form-control" id="cnfrmpassword" name="confirmpassword" required autocomplete="new-password">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="question" class="alum-label">Please Select One Of The Following Question:</label>
+                                <select class="form-select" id="question" name="question">
+                                    <option value="" disabled selected hidden>Select</option>
+                                    <option value="Mother's Maiden Name?">Mother's Maiden Name</option>
+                                    <option value="Your Place Town Of Birth?">Your Place Town Of Birth</option>
+                                    <option value="FirstSchool">First School</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="answer" class="alum-label">Secrect Answer</label>
+                                <input type="text" class="form-control" id="answer" name="secanswer">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Employer -->
+                    <div class="col-md-3 mb-2"><span class="badge-services">Current Employer</span></div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="industry" class="alum-label">Current Industry*</label>
+                                <select class="form-select" id="industry" name="industry" required>
+                                    <option value="" disabled selected hidden>Select</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="ORG" class="alum-label">Current Organization*</label>
+                                <select class="form-select" id="ORG" name="ORG" required>
+                                    <option value="" disabled selected hidden>Select Organization</option>
+                                </select>
+
+                                <div id="orgAddTrigger" class="click-to-add alum-label">Click to add your organization</div>
+
+                                <div id="orgAddBox" class="org-add-box">
+                                    <input type="text" id="newORGInput" placeholder="Type your organization name" />
+                                    <button type="button" id="addOrgBtn">Add</button>
+                                </div>
+
+                                <div id="errorPopup" class="error-popup"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="JobTitle" class="alum-label">Job Title</label>
+                                <input type="text" class="form-control" id="JobTitle" name="JobTitle">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="workEmail" class="alum-label">Work Email (optional)</label>
+                                <input type="email" class="form-control" id="workEmail" name="WorkEmail" autocomplete="email">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="empCountry" class="alum-label">Country</label>
+                                <select class="form-select" id="empCountry" name="empCountry">
+                                    <option value="" disabled selected hidden>Select</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="empCity" class="alum-label">City</label>
+                                <select class="form-select" id="empCity" name="empCity">
+                                    <option value="" disabled selected hidden>Select</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="faxNumber" class="alum-label">Fax Number</label>
+                                <input type="text" class="form-control" id="officialfaxNumber" name="FaxNumber">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label for="EmployerAddress" class="alum-label">Address*</label>
+                                <input type="text" class="form-control" id="EmployerAddress" name="empraddress" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Crowe History -->
+                    <div class="col-md-3 mb-2"><span class="badge-services">Crowe History</span></div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="staffcode" class="alum-label">Staff Code/Registration Number</label>
+                                <input type="text" class="form-control" id="staffcode" name="staffcode">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="lastposition" class="alum-label">Last Position Held*</label>
+                                <input type="text" class="form-control" id="lastposition" name="lastposition" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="department" class="alum-label">Department*</label>
+                                <select class="form-select" id="department" name="department" required>
+                                    <option value="" disabled selected hidden>Select</option>
+                                    <option value="Audit">Audit</option>
+                                    <option value="CorporateAdvisory">Corporate Advisory</option>
+                                    <option value="FinancialAdvisory">Financial Advisory</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="HR&Admin">HR & Admin</option>
+                                    <option value="IT">Information Technology (IT)</option>
+                                    <option value="RiskAdvisory">Risk Advisory</option>
+                                    <option value="Tax">Tax</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="historycity" class="alum-label">Location/City*</label>
+                                <select class="form-select" id="historycity" name="historycity" required>
+                                    <option value="" disabled selected hidden>Select</option>
+                                    <option value="Lahore">Lahore</option>
+                                    <option value="Islamabad">Islamabad</option>
+                                    <option value="Karachi">Karachi</option>
+                                    <option value="Faisalabad">Faisalabad</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="Joiningdate" class="alum-label">Joining Date</label>
+                                <input type="date" class="form-control" id="Joiningdate" name="Joiningdate">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="leavingdate" class="alum-label">Leaving Date*</label>
+                                <input type="date" class="form-control" id="leavingdate" name="leavingdate" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mb-4">
+                        <div class="privacy-box">
+                            <h6 class="privacy-heading">Crowe Privacy Statement</h6>
+                            <hr class="privacy-line">
+                            <p>
+                                Crowe is dedicated to protecting the confidentiality and privacy of information entrusted to it. As part of this
+                                fundamental obligation, Crowe is committed to the appropriate protection and use of personal information (sometimes
+                                referred to as "personally identifiable information" or "PII") that has been collected online.
+                                <br />
+                                When you register or submit personal information to Crowe we will use this information in the manner outlined in this privacy statement.
+                            </p>
+                            <div class="text-center mt-3 privacy-check">
+                                <input type="checkbox" class="form-check-input" id="agreePrivacy" name="agreePrivacy" required>
+                                <span for="agreePrivacy" class="agree-label ms-2">Yes – I consent to the above privacy statement</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="submit-btn">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Vendor JS Files -->
+    <script src="~/assets/js/jquery-3.5.1.js"></script>
+    <script src="~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/assets/js/sweet-alert.min.js"></script>
+
+    <!-- Page JS -->
+    <script src="~/assets/js/ajax/alumni/form.js"></script>
+</body>
+</html>

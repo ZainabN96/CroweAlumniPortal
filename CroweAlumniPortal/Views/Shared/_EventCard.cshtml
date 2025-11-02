@@ -1,0 +1,37 @@
+@model CroweAlumniPortal.Models.Event
+@functions {
+    string F(DateTime dt) => dt.ToString("MMM dd, yyyy – h:mm tt");
+    (string text, string cls) Badge(CroweAlumniPortal.Models.Event e)
+    {
+        var now = DateTime.Now;
+        if (e.StartDateTime <= now && e.EndDateTime >= now) return ("Ongoing Event", "crw-badge-ongoing");
+        if (e.StartDateTime > now) return ("Upcoming Event", "crw-badge-upcoming");
+        return ("Ended", "crw-badge-ended");
+    }
+}
+@{
+    var b = Badge(Model);
+}
+<div class="crw-event-card">
+    <button class="crw-share-btn" data-id="@Model.Id"><i class="fas fa-share-alt"></i></button>
+    <div class="crw-event-details">
+        <h5>@Model.Title</h5>
+        <div class="crw-event-meta-line">
+            <span><i class="fas fa-calendar-alt"></i> @F(Model.StartDateTime)</span>
+            <span><i class="fas fa-calendar-check"></i> @F(Model.EndDateTime)</span>
+        </div>
+        <div class="crw-address"><i class="fas fa-map-marker-alt"></i> @Model.Address</div>
+        <span class="@b.cls">@b.text</span>
+        <div class="d-flex gap-2 mt-2">
+            @* <a href="@Url.Action("Eventsdetail", "Dashboard", new { id = ev.Id })" class="btn btn-sm crw-btn-view">VIEW EVENT</a> *@
+
+            @* <a href="/dashboard/eventsdetail/@Model.Id" class="btn btn-sm crw-btn-view">VIEW EVENT</a> *@
+
+            <a href="@Url.Action("Eventsdetail", "Dashboard", new { id = Model.Id })" class="btn btn-sm btn-outline-black crw-btn-view">VIEW EVENT</a>
+            @* @if (!string.IsNullOrWhiteSpace(Model.RegistrationLink))
+            {
+                <a target="_blank" rel="noopener" href="@Model.RegistrationLink" class="btn btn-sm btn-outline-primary">REGISTER</a>
+            } *@
+        </div>
+    </div>
+</div>

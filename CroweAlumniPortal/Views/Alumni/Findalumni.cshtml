@@ -1,0 +1,264 @@
+﻿@{
+    ViewData["Title"] = "Alumni Page";
+}
+
+<div class="container">
+    <input type="hidden" class="text-muted" id="role">
+
+    <!-- Banner Image -->
+    <div class="banner-bg"></div>
+
+    <!-- Content Starts Here -->
+    <div class="container py-4">
+        <!-- Pagination -->
+        <div class="d-flex align-items-center gap-2 mb-3">
+            @* <button class="page-nav-btn">21</button> *@
+            <button class="page-nav-btn"><strong> Total Alumni</strong> <span id="alumniCountBtn"></span></button>
+
+            <button class="action-icon-btn">
+                <i class="bi bi-chevron-right text-dark"></i>
+            </button>
+        </div>
+
+        <!-- Description -->
+        @* <h6 class="mb-4">
+            50 Member From Unknown House, Masters in Information Technology, Year 2021
+        </h6> *@
+
+        <!-- Search Box -->
+
+        @* <form class="d-flex" style="max-width: 400px;" onsubmit="return false;">
+            <input type="text" id="alumniSearch" class="form-control" placeholder="Enter keyword…">
+            <button class="btn find-btn" id="btnSearch" type="button">
+                <i class="fas fa-search"></i>
+            </button>
+        </form> *@
+
+        @* <form class="d-flex" style="max-width: 400px;">
+            <input type="text" class="form-control" placeholder="Enter Keyword..">
+            <button class="btn find-btn" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+        </form> *@
+    </div>
+
+    <!-- Cards Section -->
+    <div class="container my-4">
+        <div id="alumniGrid" class="row g-3">
+            <!-- JS will append alumni cards here -->
+        </div>
+
+        <div id="noData" class="text-center text-muted py-4" style="display:none;">
+            No alumni found.
+        </div>
+    </div>
+        @* <div class="container my-4">
+            <div class="row g-3">
+
+                <!-- Card 1 -->
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="profile-card">
+                        <div class="img-container">
+                            <div class="no-img-placeholder" style="background-color: #aeaeae;">
+                                <div style="font-size: 36px; font-weight: bold;">AM</div>
+                            </div>
+                            <span class="chat-icon">
+                                <img src="~/assets/img/message_icon.jpeg" alt="Chat Icon">
+                            </span>
+                        </div>
+                        <div class="profile-details">
+                            <h6>Agha Mohsin Raza</h6>
+                            <small>Lahore District, Punjab</small>
+                            <div class="btn-action-section">
+                                <button class="btn btn-chat">Message</button>
+                                <button class="btn btn-profile">View Profile</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="profile-card">
+                        <div class="img-container">
+                            <img src="https://via.placeholder.com/200x200?text=Member" class="profile-img" alt="">
+                            <span class="chat-icon">
+                                <img src="~/assets/img/message_icon.jpeg" alt="Chat Icon">
+                            </span>
+                        </div>
+                        <div class="profile-details">
+                            <h6>Agha Mohsin Raza</h6>
+                            <small>Lahore District, Punjab</small>
+                            <div class="btn-action-section">
+                                <button class="btn btn-chat">Message</button>
+                                <button class="btn btn-profile">View Profile</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="profile-card">
+                        <div class="img-container">
+                            <div class="no-img-placeholder" style="background-color: #aeaeae;">
+                                <div style="font-size: 36px; font-weight: bold;">AM</div>
+                            </div>
+                            <span class="chat-icon">
+                                <img src="~/assets/img/message_icon.jpeg" alt="Chat Icon">
+                            </span>
+                        </div>
+                        <div class="profile-details">
+                            <h6>Agha Mohsin Raza</h6>
+                            <small>Lahore District, Punjab</small>
+                            <div class="btn-action-section">
+                                <button class="btn btn-chat">Message</button>
+                                <button class="btn btn-profile">View Profile</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="profile-card">
+                        <div class="img-container">
+                            <img src="https://via.placeholder.com/200x200?text=Member" class="profile-img" alt="">
+                            <span class="chat-icon">
+                                <img src="~/assets/img/message_icon.jpeg" alt="Chat Icon">
+                            </span>
+                        </div>
+                        <div class="profile-details">
+                            <h6>Agha Mohsin Raza</h6>
+                            <small>Lahore District, Punjab</small>
+                            <div class="btn-action-section">
+                                <button class="btn btn-chat">Message</button>
+                                <button class="btn btn-profile">View Profile</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="profile-card">
+                        <div class="img-container">
+                            <img src="https://via.placeholder.com/200x200?text=Ahmad" class="profile-img" alt="">
+                            <span class="chat-icon">
+                                <img src="~/assets/img/message_icon.jpeg" alt="Chat Icon">
+                            </span>
+                        </div>
+                        <div class="profile-details">
+                            <h6>Ahmad Raza</h6>
+                            <small>Khanpur, Punjab</small>
+                            <div class="btn-action-section">
+                                <button class="btn btn-chat">Message</button>
+                                <button class="btn btn-profile">View Profile</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div> *@
+
+    <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #005c97; color: white;">
+                    <h5 class="modal-title" id="messageModalLabel">Send Message</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">To:</label>
+                        <span class="badge bg-light text-dark p-2">
+                            <strong>AM</strong> Agha Mohsin Raza
+                        </span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="messageText" class="form-label">Message:</label>
+                        <textarea class="form-control" id="messageText" rows="4" placeholder="Write your message here..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" style="background-color: #005c97; border: none;">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="~/assets/js/ajax/alumni/list.js"></script>
+
+<script>
+    // When any chat icon or chat button is clicked, show the modal
+    // document.querySelectorAll('.chat-icon img, .btn-chat').forEach(el => {
+    //     el.addEventListener('click', function () {
+    //     const modal = new bootstrap.Modal(document.getElementById('messageModal'));
+    //     modal.show();
+    //     });
+    // });
+    // $(document).on("click", ".btn-chat", function(){
+    //     const otherId = $(this).data("user");
+    //     $.post(`/api/chat/start/${otherId}`)
+    //     .done(res => openConversation(res.id));
+    // });
+    $(document).on("click", ".btn-chat, .message-icon", function () {
+      const otherId = +($(this).data("user"));
+      const myId = +sessionStorage.getItem("id");
+
+      if (!myId) { window.location.href = "/Home/Login"; return; }
+      if (!otherId || otherId === myId) { return; } // self-guard
+
+      // UI feedback (optional)
+      const $btn = $(this).prop("disabled", true).text("Starting...");
+
+      $.post(`/api/chat/start/${otherId}`)
+        .done(res => {
+          // res = { id: <conversationId> }
+          window.location.href = `/Message/Inbox?c=${res.id}`;
+        })
+        .fail(xhr => {
+          alert(xhr.responseText || "Failed to start conversation.");
+          $btn.prop("disabled", false).text("Message");
+        });
+    });
+
+    function loadChatUnread() {
+        $.get("/api/chat/unread/count").done(n => {
+        const badge = document.getElementById("chatCountBadge");
+        if (!badge) return;
+        badge.style.display = n > 0 ? "inline-block" : "none";
+        badge.innerText = n;
+        });
+    }
+
+    function bumpChatBadge(){ 
+        const badge = document.getElementById("chatCountBadge");
+        if (!badge) return;
+        const n = parseInt(badge.innerText || "0") + 1;
+        badge.style.display = "inline-block";
+        badge.innerText = n;
+    }
+    $(function(){ loadChatUnread(); });
+      function loadAlumniCount() {
+      $.getJSON('/api/user/count') 
+        .done(res => {
+          const n = (res && res.count) ? res.count : 0;
+          const $btn = $('#alumniCountBtn').length ? $('#alumniCountBtn') : $('.page-nav-btn').first();
+          $btn.text(n.toLocaleString());
+        })
+        .fail(() => {
+          const $btn = $('#alumniCountBtn').length ? $('#alumniCountBtn') : $('.page-nav-btn').first();
+          $btn.text('—');
+        });
+    }
+
+    $(function() {
+      loadAlumniCount();
+    });
+
+</script>

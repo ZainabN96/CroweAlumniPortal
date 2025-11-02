@@ -1,0 +1,314 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CroweAlumniPortal</title>
+    <link href="~/assets/img/fav Crowe.png" rel="icon">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="~/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet" />
+    <link href="~/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet" />
+    <link href="~/assets/css/customcss.css" rel="stylesheet" />
+    <!-- Template Main CSS File -->
+    <link href="~/assets/css/style.css" rel="stylesheet" />
+    <link href="~/assets/css/Crowe.css" rel="stylesheet" />
+    <link href="~/assets/css/sweet-alert.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="loader-wrapper">
+        <div id="loader">
+            <div class="loader-ellips">
+                <span class="ring"></span>
+                <span class="ring"></span>
+                <span class="ring"></span>
+            </div>
+        </div>
+    </div><!-- ======= Header ======= -->
+    <nav class="navbar">
+        <div class="container-fluid">
+
+            <!-- Left Logo -->
+            <a class="navbar-brand" asp-action="dashboard" asp-controller="Dashboard">
+                <img src="~/assets//img/Crowe.png"
+                     alt="Logo" width="100" height="50">
+            </a>
+
+            <!-- Right Section -->
+            <div class="d-flex flex-column align-items-end">
+
+                <!-- Icons with dropdown -->
+                <div class="icon-row">
+                    <!-- Notification Dropdown -->
+                    <!-- Bell -->
+                    <div class="dropdown me-3 position-relative">
+                        <i class="bi-regular bi bi-bell dropdown-toggle position-relative"
+                           data-bs-toggle="dropdown" id="notifBell"></i>
+                        <div class="dropdown-menu dropdown-menu-end notifications-dropdown" id="notifList">
+                            <h6>Notifications</h6>
+                            <div id="notifItems"></div>
+                            <div class="see-more"><a href="/Notifications">See More...</a></div>
+                        </div>
+                    </div>
+                    <!-- Dropdown for 3 dots -->
+                    <div class="dropdown">
+                        <i class="bi bi-solid bi-three-dots-vertical dropdown-toggle" data-bs-toggle="dropdown"></i>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a href="#">Settings</a>
+                            <a asp-action="Profile" asp-controller="Alumni">My Profile</a>
+                            @* <a href="#">My Transactions</a> *@
+                            <a href="#">Privacy Policy</a>
+                            <a href="#">Terms & Conditions</a>
+                            <a onclick="Logout()">Logout</a>
+                            <div class="dropdown-divider"></div>
+                            <div class="powered-by">
+                                Powered by <br>
+                                <img src="~/assets/img/HCC.jpg" alt="AlmaShines"><br>
+                                Relive, Reconnect, Reunite
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Links -->
+                <ul class="navbar-nav flex-row" id="navList">
+                    <li class="nav-item"><a class="nav-link" asp-action="Noticeboard" asp-controller="Dashboard">Noticeboard</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-action="Findalumni" asp-controller="Alumni">Find Alumni</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-action="Inbox" asp-controller="Message">Message</a></li>
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+    <input type="hidden" class="text-muted" id="roles">
+
+    @RenderBody()
+    <!-- ======= Footer ======= -->
+    <footer id="footer" class="footer">
+        <div class="copyright">
+            &copy; Powered by <strong><span> 2025 Crowe Global</span></strong>.
+        </div>
+
+
+    </footer><!-- End Footer -->
+
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+    <!-- Display Notification Modal -->
+    <div class="modal custom-modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="notificationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered " role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h5 id="modal"></h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /Display Notification Modal -->
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/assets/js/loader.js"></script>
+    <script src="~/assets/js/main.js"></script>
+    <script src="~/assets/js/ajax/home/layout.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        const userType = sessionStorage.getItem("userType");
+            if (userType === "Admin") {
+            const navList = document.getElementById("navList");
+            const li = document.createElement("li");
+            li.className = "nav-item";
+            li.innerHTML = `<a class="nav-link" href="/Alumni/RegistrationRequest">Registration Request</a>`;
+            navList.appendChild(li);
+        }
+        // --- one source of truth ---
+        let notifCount = 0;
+
+        function ensureBadge() {
+          let badge = document.getElementById("notifCountBadge");
+          if (!badge) {
+            badge = document.createElement("span");
+            badge.id = "notifCountBadge";
+            badge.className =
+              "position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger";
+            badge.style.fontSize = "0.5rem";
+            badge.style.marginTop = "3px";
+
+            document.getElementById("notifBell").appendChild(badge);
+          }
+          return badge;
+        }
+
+        function updateBellBadge() {
+          const badge = ensureBadge();
+          if (!notifCount || notifCount < 0) {
+            badge.style.display = "none";
+          } else {
+            badge.style.display = "inline-block";
+            badge.innerText = notifCount;
+          }
+        }
+
+        function timeAgo(iso) {
+          // Force treat timestamp as UTC
+          const then = new Date(iso + "Z"); // 👈 add Z = UTC marker if missing
+          const now = new Date();
+
+          // Difference in seconds
+          const diff = (now.getTime() - then.getTime()) / 1000;
+
+          if (diff < 60) return "Just now";
+
+          const m = Math.floor(diff / 60);
+          if (m < 60) return `${m} min ago`;
+
+          const h = Math.floor(m / 60);
+          if (h < 24) return `${h} h ago`;
+
+          const d = Math.floor(h / 24);
+          if (d < 7) return `${d} d ago`;
+
+          return then.toLocaleDateString();
+        }
+
+        function renderNotif(n) {
+          return `
+            <div class="notification-item d-flex">
+              <img src="${n.profilePicturePath || '/assets/img/person.png'}"
+                   alt="profile"
+                   style="width:32px;height:32px;object-fit:cover;"
+                   class="rounded-circle me-2">
+              <div>
+                <a href="${n.url || '#'}">${n.title ? `<strong>${n.title}</strong>` : ''}<br>${n.message || ''}</a>
+                <small>${timeAgo(n.createdOn || new Date())}</small>
+              </div>
+            </div>`;
+        }
+
+        function loadNotifications() {
+          const userId = sessionStorage.getItem("id");
+          if (!userId) return;
+
+          $.get(`/api/notification/user/${userId}/unread`, { take: 5 })
+            .done(list => {
+              notifCount = (list && list.length) ? list.length : 0;
+              updateBellBadge();
+
+              if (!list || !list.length) {
+                $("#notifItems").html(`<div class="text-muted small p-2">No new notifications</div>`);
+                return;
+              }
+              const html = list.map(renderNotif).join("");
+              $("#notifItems").html(html);
+            })
+            .fail(() => {
+              $("#notifItems").html(`<div class="text-danger small p-2">Failed to load notifications</div>`);
+            });
+        }
+
+        const connection = new signalR.HubConnectionBuilder()
+          .withUrl("/notificationHub")
+          .build();
+
+        connection.on("notify", (n) => {
+          notifCount = (notifCount || 0) + 1;
+          updateBellBadge();
+
+          const html = renderNotif(n);
+          $("#notifItems").prepend(html);
+        });
+
+        connection.start().catch(err => console.error(err));
+
+        document.querySelectorAll('.dropdown').forEach(dd => {
+          dd.addEventListener('show.bs.dropdown', () => {
+            notifCount = 0; updateBellBadge();
+
+            const userId = sessionStorage.getItem("id");
+            $.post(`/api/notification/user/${userId}/mark-all-read`).always(() => {
+              notifCount = 0; updateBellBadge(); loadNotifications();
+            });
+          });
+        });
+
+        $(function () {
+          loadNotifications();
+
+        });
+    
+        const chatConn = new signalR.HubConnectionBuilder().withUrl("/chathub").build();
+
+        chatConn.on("message", (m) => {
+          // agar active conversation open hai
+          if (currentConversationId && m.conversationId === currentConversationId) {
+             appendMessage(m);
+          } else {
+             // badge increment (chat unread)
+             bumpChatBadge();
+          }
+        });
+
+        chatConn.on("seen", (e) => {
+          // show "Seen" mark if you want
+        });
+
+        chatConn.start().catch(console.error);
+
+        let currentConversationId = null;
+
+        function openConversation(convoId) {
+          currentConversationId = convoId;
+          chatConn.invoke("JoinConversation", convoId);
+
+          $("#messages").html(`<div class="text-muted small p-2">Loading…</div>`);
+          $.get(`/api/chat/${convoId}/messages`, { take: 50 })
+           .done(list => {
+              const html = list.reverse().map(renderMessage).join("");
+              $("#messages").html(html);
+              // mark seen
+              $.post(`/api/chat/${convoId}/seen`);
+           });
+        }
+
+        function renderMessage(m) {
+          const mine = (parseInt(sessionStorage.getItem("id")) === m.senderId);
+          const media = m.mediaPath ? (m.mediaType === "image"
+              ? `<img src="${m.mediaPath}" class="img-fluid rounded mt-1">`
+              : `<a href="${m.mediaPath}" target="_blank">Attachment</a>`) : "";
+          return `
+            <div class="yb-message-box ${mine ? 'text-end' : ''}">
+              ${m.body ? `<div>${m.body.replace(/\n/g,'<br>')}</div>` : ""}
+              ${media}
+              <div class="text-muted small mt-1">${new Date(m.createdOn).toLocaleTimeString()}</div>
+            </div>`;
+        }
+
+        function appendMessage(m){ $("#messages").append(renderMessage(m)); }
+
+        /* Send button */
+        $("#sendBtn").on("click", function(){
+          const body = ($("#msgInput").val() || "").trim();
+          const file = $("#msgFile")[0]?.files?.[0] || null;
+          if (!body && !file) return;
+
+          const fd = new FormData();
+          fd.append("body", body);
+          if (file) fd.append("media", file);
+
+          $.ajax({
+            url: `/api/chat/${currentConversationId}/send`,
+            type: "POST",
+            data: fd, processData: false, contentType: false
+          }).done(() => {
+            $("#msgInput").val(""); $("#msgFile").val("");
+          });
+        });
+    </script>
+  @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

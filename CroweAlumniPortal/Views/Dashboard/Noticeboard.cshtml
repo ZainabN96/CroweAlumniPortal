@@ -1,0 +1,42 @@
+﻿@model CroweAlumniPortal.Helper.EventsDashboardVm
+
+@{
+    ViewData["Title"] = "Notice Board";
+}
+
+<div class="container">
+    <div class="crw-event">
+        <!-- Dynamic Ongoing -->
+        @if (Model.Ongoing.Any())
+        {
+            <h5 class="mt-4 mb-2">Ongoing Events</h5>
+            @foreach (var ev in Model.Ongoing)
+            {
+                @await Html.PartialAsync("_EventCard", ev)
+            }
+        }
+
+        <!-- Dynamic Upcoming -->
+        @if (Model.Upcoming.Any())
+        {
+            <h5 class="mt-4 mb-2">Upcoming Events</h5>
+            @foreach (var ev in Model.Upcoming)
+            {
+                @await Html.PartialAsync("_EventCard", ev)
+            }
+        }
+
+        <!-- Dynamic Past -->
+        @if (Model.Past.Any())
+        {
+            <h5 class="mt-4 mb-2">Recent Past</h5>
+            @foreach (var ev in Model.Past)
+            {
+                @await Html.PartialAsync("_EventCard", ev)
+            }
+        }
+
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+</div>

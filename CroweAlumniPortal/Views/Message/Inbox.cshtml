@@ -1,0 +1,607 @@
+﻿@{
+    ViewData["Title"] = "Inbox";
+}
+
+<div class="yb-container-fluid">
+    <!-- Left Sidebar -->
+    <div class="yb-left-sidebar">
+        <div class="yb-sidebar-header">
+            <button class="btn yb-btn-blue" id="btnNewMessage">SEND NEW MESSAGE</button>
+        </div>
+
+        <div class="yb-scrollable-section">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Chats</h5>
+                <div>
+                    <i class="fas fa-cog me-3"></i>
+                    <i class="fas fa-search" id="toggleSearchChats" style="cursor:pointer;"></i>
+                </div>
+            </div>
+
+            <div id="searchChatsBar" class="px-3 d-none">
+                <div class="yb-input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Search contacts...">
+                    <span class="yb-input-group-text" id="closeSearchChats" style="cursor:pointer;">&times;</span>
+                </div>
+            </div>
+
+            <!-- Chat Items -->
+            <div id="chatList"></div>
+        </div>
+    </div>
+
+    <!-- Right Chat Area -->
+    <div class="yb-chat-area flex-grow-1 p-4">
+        <div class="yb-chat-header">
+            <div id="chatHeaderAvatarSlot" class="me-2" style="width:36px;height:36px;">
+                <img id="chatHeaderAvatar" class="rounded-circle" style="width:36px;height:36px;object-fit:cover;" />
+            </div>
+            <div>
+                <h5 class="mb-0" id="chatHeaderTitle"></h5>
+                <small class="text-muted" id="chatHeaderSub"></small>
+            </div>
+
+            <div class="dropdown">
+                <i class="bi bi-three-dots-vertical" data-bs-toggle="dropdown" role="button"></i>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#">View Profile</a></li>
+                    <li><a class="dropdown-item" href="#">Mute Chat</a></li>
+                    <li><a class="dropdown-item" href="#">Pin Chat</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="yb-chat-content" id="chatContent"></div>
+
+        <div class="yb-input-bar mt-2">
+            <div class="yb-input-group">
+                <input type="file" id="msgFile" class="d-none" />
+                <input type="text" id="msgInput" class="form-control" placeholder="Say something..." />
+                <button class="btn" id="sendBtn"><i class="bi bi-send"></i></button>
+            </div>
+            <!-- initial value (from server) + we also fall back to ?c= -->
+            <div id="chatState" data-conversation-id="@ViewBag.ConversationId"></div>
+        </div>
+    </div>
+</div>
+
+<!-- deps -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/microsoft.signalr.min.js"></script>
+
+<script>
+    // ====== state ======
+    const TAKE = 30;
+    let loadingOlder = false, reachedTop = false, oldestId = null;
+
+    // NEVER cast with '+' on init
+    let activeConversationId = null;
+
+    const $chatList = $("#chatList");
+    const $chatContent = $("#chatContent");
+    const $title = $("#chatHeaderTitle");
+    const $sub = $("#chatHeaderSub");
+    const $slot = $("#chatHeaderAvatarSlot");
+
+    // helpers
+    const gid = o => o?.id ?? o?.Id ?? o?.ID;
+    const prefer = v => (v !== undefined && v !== null && v !== "" && v !== "0" && v !== 0) ? String(v) : null;
+
+    function escapeHtml(s){return (s||"").replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
+    function uiError(where, err){
+      console.error(where, err);
+      $chatContent.prepend(
+        `<div class="alert alert-danger py-1 px-2 my-2">
+          <strong>${where}:</strong> ${escapeHtml(err?.responseText || err?.message || err?.statusText || 'Unknown error')}
+         </div>`
+      );
+    }
+
+    // Sidebar row template
+    function chatRowTpl(raw){
+      const c = {
+        id: gid(raw),
+        title: raw.title ?? raw.Title ?? 'Chat',
+        avatar: raw.avatar ?? raw.Avatar ?? '',
+        lastMessage: raw.lastMessage ?? raw.LastMessage ?? '',
+        lastAt: raw.lastAt ?? raw.LastAt ?? null,
+        hasUnread: raw.hasUnread ?? raw.HasUnread ?? false
+      };
+      const initials = c.title.split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();
+      const img = c.avatar
+        ? `<img src="${c.avatar}" class="rounded-circle me-3" style="width:36px;height:36px;object-fit:cover;">`
+        : `<div class="yb-avatar-circle me-3" style="width:36px;height:36px;border-radius:50%;background:#005c97;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">${initials}</div>`;
+      const time = c.lastAt ? moment(c.lastAt).fromNow() : '';
+      const dot = c.hasUnread ? `<span class="badge bg-primary ms-2" style="height:10px;width:10px;border-radius:50%;display:inline-block;"></span>` : '';
+      return `<div class="yb-chat-item d-flex align-items-start chat-row" data-id="${c.id}" style="cursor:pointer;">
+                ${img}
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between">
+                    <strong>${escapeHtml(c.title)}</strong>
+                    <small class="text-muted">${time}</small>
+                  </div>
+                  <small class="text-muted">${escapeHtml(c.lastMessage)}</small>
+                </div>
+                ${dot}
+              </div>`;
+    }
+
+    // Header (with safe fallback — agar /header 404 de, to initials)
+    async function bindHeader(cid){
+      try{
+        const h = await $.get(`/api/chat/${cid}/header`);
+        const title  = h.title ?? h.Title ?? "";
+        const sub    = h.sub   ?? h.Sub   ?? "";
+        const avatar = h.avatar?? h.Avatar?? "";
+
+        $title.text(title);
+       // $sub.text(sub);
+        if (avatar){
+          $slot.html(`<img class="rounded-circle" src="${avatar}" style="width:36px;height:36px;object-fit:cover;">`);
+        }else{
+          const initials = (title||"?").split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();
+          $slot.html(`<div class="yb-avatar-circle" style="width:36px;height:36px;border-radius:50%;
+                       background:#005c97;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">${initials}</div>`);
+        }
+      }catch(err){
+        // 404 -> fallback initials + empty sub
+        const initials = "?";
+        $title.text("Chat");
+        $sub.text("");
+        $slot.html(`<div class="yb-avatar-circle" style="width:36px;height:36px;border-radius:50%;
+                     background:#005c97;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">${initials}</div>`);
+      }
+    }
+
+    // Messages renderer
+    function renderMsg(m, meId){
+      const senderId   = m.senderId   ?? m.SenderId;
+      const createdOn  = m.createdOn  ?? m.CreatedOn;
+      const bodyText   = m.body       ?? m.Body;
+      const mediaPath  = m.mediaPath  ?? m.MediaPath;
+      const senderName = m.senderName ?? m.SenderName;
+      const senderAvatar = m.senderAvatar ?? m.SenderAvatar;
+
+      const isMe = (String(senderId) === String(meId));
+      const time = createdOn ? moment.utc(createdOn).utcOffset('+0500').format('h:mm A') : '';
+      const body  = bodyText ? `<p class="mb-0">${escapeHtml(bodyText)}</p>` : '';
+      const media = mediaPath ? `<div><a href="${mediaPath}" target="_blank">📎 Attachment</a></div>` : '';
+
+      const name = isMe ? 'You' : (senderName || `User ${senderId}`);
+      const initials = (name||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+      const avatarHtml = isMe ? '' : (senderAvatar
+        ? `<div class="yb-msg-avatar"><img src="${senderAvatar}" alt=""></div>`
+        : `<div class="yb-msg-avatar">${initials}</div>`);
+
+      if (!isMe) {
+        return `<div class="yb-msg-row them">
+                  ${avatarHtml}
+                  <div class="yb-msg-bubble">
+                    <div class="yb-msg-meta"><strong>${escapeHtml(name)}</strong> • ${time}</div>
+                    ${body}${media}
+                  </div>
+                </div>`;
+      }
+      return `<div class="yb-msg-row me">
+                <div class="yb-msg-bubble">
+                  <div class="yb-msg-meta">${name} • ${time}</div>
+                  ${body}${media}
+                </div>
+              </div>`;
+    }
+    const msgHtml = (m)=>renderMsg(m, parseInt('@Context.Session.GetString("UserId")' || '0'));
+
+    // Load initial messages for a chat
+    async function loadInitialMessages(cid){
+      const list = await $.get(`/api/chat/${cid}/messages`, { take: TAKE });
+      const chronological = [...list].reverse();
+      $chatContent.append(chronological.map(msgHtml).join(""));
+      if (list.length > 0) oldestId = gid(list[list.length - 1]);
+      $chatContent.scrollTop($chatContent[0].scrollHeight);
+      if (list.length < TAKE) reachedTop = true;
+    }
+
+    async function loadOlder(){
+      if (loadingOlder || reachedTop || !activeConversationId || !oldestId) return;
+      loadingOlder = true;
+      try{
+        const prevH = $chatContent[0].scrollHeight;
+        const list = await $.get(`/api/chat/${activeConversationId}/messages`, { take: TAKE, beforeId: oldestId });
+        if (!Array.isArray(list) || list.length === 0){ reachedTop = true; return; }
+        const chronological = [...list].reverse();
+        $chatContent.prepend(chronological.map(msgHtml).join(""));
+        oldestId = gid(list[list.length - 1]);
+        const newH = $chatContent[0].scrollHeight;
+        $chatContent.scrollTop($chatContent.scrollTop() + (newH - prevH));
+        if (list.length < TAKE) reachedTop = true;
+      } finally { loadingOlder=false; }
+    }
+    $chatContent.on("scroll", function(){ if ($chatContent.scrollTop() <= 60){ loadOlder(); } });
+
+    // Open chat
+    async function openChat(cid){
+      if (!cid) return;
+      activeConversationId = String(cid); // keep as string
+      loadingOlder=false; reachedTop=false; oldestId=null;
+      $chatContent.html("");
+
+      // push ?c=<id> in URL
+      const url = new URL(window.location.href);
+      url.searchParams.set("c", activeConversationId);
+      window.history.replaceState({}, "", url);
+
+      await bindHeader(activeConversationId);
+      await loadInitialMessages(activeConversationId);
+      $.post(`/api/chat/${activeConversationId}/seen`).catch(()=>{});
+    }
+
+    // Sidebar load — PICK FIRST CHAT WHEN NOTHING VALID
+    async function loadSidebar(){
+      try{
+        $chatList.html(`<div class="p-2 text-muted">Loading chats…</div>`);
+        const list = await $.get("/api/chat/list");
+        if (!Array.isArray(list) || list.length === 0){
+          $chatList.html(`<div class="p-2 text-muted">No conversations.</div>`);
+          return;
+        }
+        $chatList.html(list.map(chatRowTpl).join(""));
+
+        const fromData  = prefer($("#chatState").attr("data-conversation-id"));
+        const fromQuery = prefer(new URLSearchParams(location.search).get("c"));
+        const firstId   = String(gid(list[0]));
+        if (!activeConversationId){
+          activeConversationId = fromData || fromQuery || firstId;  // <- pick first chat if nothing
+        }
+
+        $chatList.find(`.chat-row[data-id="${activeConversationId}"]`).addClass("active");
+        await openChat(activeConversationId);
+      }catch(err){ uiError("loadSidebar", err); }
+    }
+
+    // Send
+    const $msgInput = $("#msgInput");
+    const $msgFile  = $("#msgFile");
+    async function send(){
+      const body = $msgInput.val().trim();
+      const file = $msgFile[0]?.files?.[0];
+      if (!activeConversationId || (!body && !file)) return;
+
+      const fd = new FormData();
+      fd.append("body", body);
+      if (file) fd.append("media", file);
+
+      await $.ajax({
+        url: `/api/chat/${activeConversationId}/send`,  // ← never null now
+        method: "POST",
+        data: fd,
+        processData:false,
+        contentType:false
+      });
+
+      $msgInput.val(""); $msgFile.val("");
+
+      // append last quickly
+      const latest = await $.get(`/api/chat/${activeConversationId}/messages`, { take: 1 });
+      if (Array.isArray(latest) && latest.length){
+        $chatContent.append(msgHtml(latest[0]));
+        $chatContent.scrollTop($chatContent[0].scrollHeight);
+        if (!oldestId) oldestId = gid(latest[0]);
+      }
+    }
+
+    // Clicks + init
+    $(document).on("click", ".chat-row", function(){
+      const cid = $(this).data("id"); // keep raw
+      $(".chat-row.active").removeClass("active");
+      $(this).addClass("active");
+      openChat(cid);
+    });
+
+    $("#sendBtn").on("click", send);
+    $("#msgInput").on("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
+
+    // Start
+    $(async function(){ await loadSidebar(); });
+</script>
+
+// <script>
+//     /* =========================
+//        GLOBAL STATE + ELEMENTS
+//        ========================= */
+//     window.ChatState = { activeConversationId: null };
+
+//     const $chatList    = $("#chatList");
+//     const $chatContent = $("#chatContent");
+//     const $title       = $("#chatHeaderTitle");
+//     const $sub         = $("#chatHeaderSub");
+//     const $slot        = $("#chatHeaderAvatarSlot");
+//     const $msgInput    = $("#msgInput");
+//     const $msgFile     = $("#msgFile");
+//     const $sendBtn     = $("#sendBtn");
+
+//     const TAKE = 30;
+//     let loadingOlder = false;
+//     let reachedTop   = false;
+//     let oldestId     = null;
+
+//     /* your logged-in user id (for message side) */
+//     const meId = (() => {
+//       try { return parseInt('@Context.Session.GetString("UserId")' || '0'); } catch { return 0; }
+//     })();
+
+//     /* helpers */
+//     const gid = o => o?.id ?? o?.Id ?? o?.ID;
+
+//     function escapeHtml(s){return (s||"").replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
+
+//     function uiError(where, err){
+//       console.error(where, err);
+//       $chatContent.prepend(
+//         `<div class="alert alert-danger py-1 px-2 my-2">
+//             <strong>${where}:</strong> ${escapeHtml(err?.responseText || err?.message || err?.statusText || 'Unknown error')}
+//          </div>`
+//       );
+//     }
+
+//     /* =========================
+//        TEMPLATES
+//        ========================= */
+//     function chatRowTpl(raw){
+//       const c = {
+//         id: gid(raw),
+//         title: raw.title ?? raw.Title ?? 'Chat',
+//         avatar: raw.avatar ?? raw.Avatar ?? '',
+//         lastMessage: raw.lastMessage ?? raw.LastMessage ?? '',
+//         lastAt: raw.lastAt ?? raw.LastAt ?? null,
+//         hasUnread: raw.hasUnread ?? raw.HasUnread ?? false
+//       };
+//       const initials = c.title.split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();
+//       const img = c.avatar
+//           ? `<img src="${c.avatar}" class="rounded-circle me-3" style="width:36px;height:36px;object-fit:cover;">`
+//           : `<div class="yb-avatar-circle me-3" style="width:36px;height:36px;border-radius:50%;background:#005c97;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">${initials}</div>`;
+//       const time = c.lastAt ? moment(c.lastAt).fromNow() : '';
+//       const dot  = c.hasUnread ? `<span class="badge bg-primary ms-2" style="height:10px;width:10px;border-radius:50%;display:inline-block;"></span>` : '';
+//       return `<div class="yb-chat-item d-flex align-items-start chat-row" data-id="${c.id}" style="cursor:pointer;">
+//                 ${img}
+//                 <div class="flex-grow-1">
+//                   <div class="d-flex justify-content-between">
+//                     <strong>${escapeHtml(c.title)}</strong>
+//                     <small class="text-muted">${time}</small>
+//                   </div>
+//                   <small class="text-muted">${escapeHtml(c.lastMessage)}</small>
+//                 </div>
+//                 ${dot}
+//               </div>`;
+//     }
+
+//     function renderMsg(m, meId) {
+//       const senderId     = m.senderId     ?? m.SenderId;
+//       const createdOn    = m.createdOn    ?? m.CreatedOn;
+//       const bodyText     = m.body         ?? m.Body;
+//       const mediaPath    = m.mediaPath    ?? m.MediaPath;
+//       const senderName   = m.senderName   ?? m.SenderName;
+//       const senderAvatar = m.senderAvatar ?? m.SenderAvatar;
+
+//       const isMe = (senderId == meId);
+//       const time = createdOn ? moment.utc(createdOn).utcOffset('+0500').format('h:mm A') : '';
+//       const body  = bodyText ? `<p class="mb-0">${escapeHtml(bodyText)}</p>` : '';
+//       const media = mediaPath ? `<div><a href="${mediaPath}" target="_blank">📎 Attachment</a></div>` : '';
+
+//       const name = isMe ? 'You' : (senderName || `User ${senderId}`);
+//       const initials = (name||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+//       const avatarHtml = isMe ? '' :
+//         (senderAvatar
+//           ? `<div class="yb-msg-avatar"><img src="${senderAvatar}" alt=""></div>`
+//           : `<div class="yb-msg-avatar">${initials}</div>`);
+
+//       if (!isMe) {
+//         return `<div class="yb-msg-row them">
+//                   ${avatarHtml}
+//                   <div class="yb-msg-bubble">
+//                     <div class="yb-msg-meta"><strong>${escapeHtml(name)}</strong> • ${time}</div>
+//                     ${body}${media}
+//                   </div>
+//                 </div>`;
+//       } else {
+//         return `<div class="yb-msg-row me">
+//                   <div class="yb-msg-bubble">
+//                     <div class="yb-msg-meta">${name} • ${time}</div>
+//                     ${body}${media}
+//                   </div>
+//                 </div>`;
+//       }
+//     }
+//     const msgHtml = m => renderMsg(m, meId);
+
+//     /* =========================
+//        LOAD SIDEBAR + OPEN CHAT
+//        ========================= */
+//     async function loadSidebar(){
+//       try{
+//         $chatList.html(`<div class="p-2 text-muted">Loading chats…</div>`);
+//         const list = await $.get("/api/chat/list");
+
+//         if (!Array.isArray(list) || list.length === 0){
+//           $chatList.html(`<div class="p-2 text-muted">No conversations.</div>`);
+//           return;
+//         }
+
+//         $chatList.html(list.map(chatRowTpl).join(""));
+
+//         initialize activeConversationId once
+//         const cidFromData  = $("#chatState").attr("data-conversation-id") || "";
+//         const cidFromQuery = new URLSearchParams(location.search).get("c") || "";
+//         if (!window.ChatState.activeConversationId) {
+//           window.ChatState.activeConversationId = cidFromData || cidFromQuery || String(gid(list[0]));
+//         }
+
+//         $chatList.find(`.chat-row[data-id="${window.ChatState.activeConversationId}"]`).addClass("active");
+//         await openChat(window.ChatState.activeConversationId);
+//       }catch(err){
+//         uiError("loadSidebar", err);
+//       }
+//     }
+
+//     async function openChat(cid){
+//       try{
+//         if (!cid) { uiError("openChat", { message: "No conversation selected." }); return; }
+
+//         window.ChatState.activeConversationId = String(cid);
+//         loadingOlder=false; reachedTop=false; oldestId=null;
+//         $chatContent.html("");
+
+//         persist ?c=
+//         const url = new URL(window.location.href);
+//         url.searchParams.set("c", window.ChatState.activeConversationId);
+//         window.history.replaceState({}, "", url);
+
+//         await bindHeader(window.ChatState.activeConversationId);
+//         await loadInitialMessages(window.ChatState.activeConversationId);
+//         $.post(`/api/chat/${window.ChatState.activeConversationId}/seen`).catch(()=>{});
+//       }catch(err){
+//         uiError("openChat", err);
+//       }
+//     }
+
+//     async function bindHeader(cid){
+//       try{
+//         const h = await $.get(`/api/chat/${cid}/header`);
+//         const title  = h.title  ?? h.Title  ?? "";
+//         const sub    = h.sub    ?? h.Sub    ?? "";
+//         const avatar = h.avatar ?? h.Avatar ?? "";
+
+//         $title.text(title);
+//         $sub.text(sub);
+//         if (avatar){
+//           $slot.html(`<img class="rounded-circle" src="${avatar}" style="width:36px;height:36px;object-fit:cover;">`);
+//         }else{
+//           const initials = title ? title.split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase() : "?";
+//           $slot.html(`<div class="yb-avatar-circle" style="width:36px;height:36px;border-radius:50%;
+//                        background:#005c97;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">${initials}</div>`);
+//         }
+//       }catch(err){
+//         uiError("bindHeader", err);
+//       }
+//     }
+
+//     /* =========================
+//        MESSAGES: LOAD & PAGING
+//        ========================= */
+//     async function loadInitialMessages(cid){
+//       try{
+//         const list = await $.get(`/api/chat/${cid}/messages`, { take: TAKE });
+//         if (!Array.isArray(list)){
+//           throw new Error("Messages API returned non-array.");
+//         }
+//         const chronological = [...list].reverse();
+//         $chatContent.append(chronological.map(msgHtml).join(""));
+
+//         if (list.length > 0) oldestId = gid(list[list.length - 1]);
+//         $chatContent.scrollTop($chatContent[0].scrollHeight);
+//         if (list.length < TAKE) reachedTop = true;
+//       }catch(err){
+//         uiError("loadInitialMessages", err);
+//       }
+//     }
+
+//     async function loadOlder(){
+//       if (loadingOlder || reachedTop || !window.ChatState.activeConversationId || !oldestId) return;
+//       loadingOlder = true;
+//       try{
+//         const prevH = $chatContent[0].scrollHeight;
+//         const list = await $.get(`/api/chat/${window.ChatState.activeConversationId}/messages`, { take: TAKE, beforeId: oldestId });
+//         if (!Array.isArray(list) || list.length === 0){ reachedTop = true; loadingOlder=false; return; }
+
+//         const chronological = [...list].reverse();
+//         $chatContent.prepend(chronological.map(msgHtml).join(""));
+//         oldestId = gid(list[list.length - 1]);
+
+//         const newH = $chatContent[0].scrollHeight;
+//         $chatContent.scrollTop($chatContent.scrollTop() + (newH - prevH));
+//         if (list.length < TAKE) reachedTop = true;
+//       }catch(err){
+//         uiError("loadOlder", err);
+//       }finally{ loadingOlder=false; }
+//     }
+
+//     $chatContent.on("scroll", function(){
+//       if ($chatContent.scrollTop() <= 60){ loadOlder(); }
+//     });
+
+//     /* =========================
+//        SEND MESSAGE (single source)
+//        ========================= */
+//     async function send(){
+//       const body = $msgInput.val()?.trim() || "";
+//       const file = $msgFile[0]?.files?.[0] || null;
+//       const cid  = window.ChatState.activeConversationId;
+
+//       console.log("send(): activeConversationId =", cid);
+
+//       if (!cid) {
+//         uiError("send", { message: "No conversation selected." });
+//         return;
+//       }
+//       if (!body && !file) return;
+
+//       const nearBottom = ($chatContent[0].scrollHeight - $chatContent.scrollTop() - $chatContent.outerHeight()) < 120;
+
+//       const fd = new FormData();
+//       fd.append("body", body);
+//       if (file) fd.append("media", file);
+
+//       try{
+//         await $.ajax({
+//           url: `/api/chat/${cid}/send`,
+//           method: "POST",
+//           data: fd,
+//           processData: false,
+//           contentType: false
+//         });
+
+//         $msgInput.val(""); $msgFile.val("");
+
+//         fetch latest one and append
+//         const latest = await $.get(`/api/chat/${cid}/messages`, { take: 1 });
+//         if (Array.isArray(latest) && latest.length){
+//           $chatContent.append(msgHtml(latest[0]));
+//           if (nearBottom) $chatContent.scrollTop($chatContent[0].scrollHeight);
+//           if (!oldestId) oldestId = gid(latest[0]);
+//         }
+//         refresh sidebar ordering/preview
+//         await loadSidebar();
+//       }catch(err){
+//         uiError("send", err);
+//       }
+//     }
+
+//     /* =========================
+//        BINDINGS
+//        ========================= */
+//     $(document).on("click", ".chat-row", function(){
+//       const cid = String($(this).attr("data-id"));
+//       $(".chat-row.active").removeClass("active");
+//       $(this).addClass("active");
+//       openChat(cid);
+//     });
+
+//     $(async function(){
+//       init activeConversationId once (DOM or query)
+//       const cidFromData  = $("#chatState").attr("data-conversation-id") || "";
+//       const cidFromQuery = new URLSearchParams(location.search).get("c") || "";
+//       window.ChatState.activeConversationId = cidFromData || cidFromQuery || null;
+//       console.log("init activeConversationId:", window.ChatState.activeConversationId);
+
+//       await loadSidebar();
+
+//       input bindings
+//       $sendBtn.on("click", send);
+//       $msgInput.on("keydown", e => {
+//         if (e.key === "Enter" && !e.shiftKey) {
+//           e.preventDefault();
+//           send();
+//         }
+//       });
+//     });
+// </script>

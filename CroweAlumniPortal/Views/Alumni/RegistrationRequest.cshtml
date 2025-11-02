@@ -1,0 +1,262 @@
+﻿@{
+    ViewData["Title"] = "Registration Request";
+}
+   
+    <div class="container py-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h3 class="page-title mb-0">Pending Alumni Approvals</h3>
+            <div class="search-wrap d-flex align-items-center">
+                <input type="text" class="form-control" id="searchBox" placeholder="Search name, email, login ID..." style="min-width: 280px;" />
+                <select id="pageSize" class="form-select" style="width: 120px;">
+                    <option value="10">10</option>
+                    <option value="20" selected>20</option>
+                    <option value="50">50</option>
+                </select>
+                <button class="btn btn-outline-secondary" id="refreshBtn"><i class="bi bi-arrow-clockwise"></i></button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="pendingTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:60px;">#</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Login ID</th>
+                                @* <th>Member</th> *@
+                                <th>Qualification</th>
+                                <th style="">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="7" class="text-center py-4">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+                <div id="resultInfo" class="small text-muted">&nbsp;</div>
+                <nav>
+                    <ul class="pagination mb-0" id="pager"></ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Offcanvas -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="detailPanel" aria-labelledby="detailLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="detailLabel">Alumni Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <img id="dAvatar" class="avatar" alt="Profile" />
+                <div>
+                    <div id="dName" class="fw-bold fs-5">—</div>
+                    <div id="dEmail" class="text-muted">—</div>
+                    <span class="badge bg-warning-subtle text-warning-emphasis status-badge">Pending</span>
+                </div>
+            </div>
+            <div class="kv">
+                <div class="key">Login ID</div><div id="dLogin">—</div>
+                <div class="key">Member</div><div id="dMember">—</div>
+                <div class="key">Qualification</div><div id="dQual">—</div>
+                <div class="key">DOB</div><div id="dDOB">—</div>
+                <div class="key">CNIC</div><div id="dCNIC">—</div>
+                <div class="key">Phone</div><div id="dPhone">—</div>
+                <div class="key">Address</div><div id="dAddress">—</div>
+                <div class="key">Industry</div><div id="dIndustry">—</div>
+                <div class="key">Organization</div><div id="dOrg">—</div>
+                <div class="key">Current Job Title</div><div id="dJob">—</div>
+                <div class="key">City</div><div id="dHistCity">—</div>
+                <div class="key">Position at Crowe</div><div id="dLastPos">—</div>
+                <div class="key">Crowe Department</div><div id="dDept">—</div>
+                <div class="key">Joining / Leaving</div><div id="dJoinLeave">—</div>
+            </div>
+            <hr />
+            <div class="d-flex gap-2">
+                <button class="btn btn-success" id="approveBtn"><i class="bi bi-check2-circle"></i> Approve</button>
+                <button class="btn btn-outline-danger" id="rejectBtn"><i class="bi bi-x-circle"></i> Reject</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reject Application</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label">Reason (will be emailed to applicant)</label>
+                    <textarea id="rejectReason" class="form-control" rows="4" placeholder="Write a brief reason…"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmRejectBtn">Reject</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vendor JS -->
+    <script src="~/assets/js/jquery-3.5.1.js"></script>
+    <script src="~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/assets/js/sweet-alert.min.js"></script>
+
+    <script>
+        const API_BASE = "/api/admin/users";
+
+        let state = {
+            page: 1,
+            pageSize: 20,
+            total: 0,
+            items: [],
+            selectedId: null
+        };
+
+        function fmt(d) { if(!d) return "—"; return new Date(d).toLocaleDateString(); }
+        function html(x){ return x == null || x === '' ? '—' : x; }
+
+        function loadPending() {
+            $("#pendingTable tbody").html('<tr><td colspan="7" class="text-center py-4">Loading…</td></tr>');
+            const q = `${API_BASE}/pending?page=${state.page}&pageSize=${state.pageSize}`;
+            $.getJSON(q).done(res => {
+                // Expecting: { items, total } or (Items, Total)
+                const items = res.items || res.Items || [];
+                const total = res.total ?? res.Total ?? items.length;
+                state.items = items; state.total = total;
+                renderTable();
+                renderPager();
+            }).fail(xhr => {
+                $("#pendingTable tbody").html(`<tr><td colspan="7" class="text-center text-danger py-4">Failed to load (${xhr.status}).</td></tr>`);
+            });
+        }
+
+        function renderTable(){
+            const $tb = $("#pendingTable tbody");
+            const q = ($("#searchBox").val() || '').toLowerCase();
+            const rows = [];
+            let idx = (state.page - 1) * state.pageSize;
+            state.items.filter(u => {
+                if(!q) return true;
+                const hay = `${u.firstName||u.FirstName||''} ${u.lastName||u.LastName||''} ${u.emailAddress||u.EmailAddress||''} ${u.loginId||u.LoginId||''}`.toLowerCase();
+                return hay.includes(q);
+            }).forEach(u => {
+                const id = u.id || u.Id;
+                const name = `${html(u.firstName||u.FirstName)} ${html(u.lastName||u.LastName)}`;
+                const email = html(u.emailAddress||u.EmailAddress);
+                const login = html(u.loginId||u.LoginId);
+                const member = html(u.memberStatus||u.MemberStatus);
+                const qual = html(u.qualification||u.Qualification);
+                rows.push(`
+                    <tr data-id="${id}">
+                        <td>${++idx}</td>
+                        <td>${name}</td>
+                        <td>${email}</td>
+                        <td><code>${login}</code></td>
+                        <td>${qual}</td>
+                        <td>
+                            <div class="btn btn-group-sm">
+                                <button class="btn btn-outline-primary viewBtn"><i class="bi bi-eye"></i> </button>
+                                <button class="btn btn-success approveBtn"><i class="bi bi-check2"></i></button>
+                                <button class="btn btn-outline-danger rejectBtn"><i class="bi bi-x"></i></button>
+                            </div>
+                        </td>
+                    </tr>`);
+            });
+            $tb.html(rows.length ? rows.join('') : '<tr><td colspan="7" class="text-center py-4">No pending users.</td></tr>');
+
+            $("#resultInfo").text(`${state.total} total pending`);
+        }
+
+        function renderPager(){
+            const pages = Math.max(1, Math.ceil(state.total / state.pageSize));
+            const $p = $("#pager");
+            const btn = (p, lbl, dis=false, act=false) => `<li class="page-item ${dis?'disabled':''} ${act?'active':''}"><a class="page-link" href="#" data-p="${p}">${lbl}</a></li>`;
+            let html = '';
+            html += btn(Math.max(1, state.page-1), '&laquo;', state.page===1);
+            for(let i=1;i<=pages && i<=10;i++){
+                html += btn(i, i, false, i===state.page);
+            }
+            html += btn(Math.min(pages, state.page+1), '&raquo;', state.page===pages);
+            $p.html(html);
+            $p.find('a').on('click', function(e){ e.preventDefault(); const p = +($(this).data('p')); if(!isNaN(p) && p>0){ state.page=p; loadPending(); } });
+        }
+
+        function openDetail(id){
+            const url = `${API_BASE}/${id}`;
+            state.selectedId = id;
+            $.getJSON(url).done(u => {
+                const avatar = u.profilePicturePath || u.ProfilePicturePath || '';
+                if(avatar) $('#dAvatar').attr('src', avatar).show(); else $('#dAvatar').hide();
+                $('#dName').text(`${html(u.firstName||u.FirstName)} ${html(u.lastName||u.LastName)}`);
+                $('#dEmail').text(html(u.emailAddress||u.EmailAddress));
+                $('#dLogin').text(html(u.loginId||u.LoginId));
+                $('#dMember').text(html(u.memberStatus||u.MemberStatus));
+                $('#dQual').text(html(u.qualification||u.Qualification));
+                $('#dDOB').text(fmt(u.dob||u.DOB));
+                $('#dCNIC').text(html(u.cnic||u.CNIC));
+                $('#dPhone').text(html(u.mobileNumber||u.MobileNumber));
+                $('#dAddress').text(`${html(u.address||u.Address)}, ${html(u.city||u.City)}, ${html(u.country||u.Country)} ${html(u.zip||u.ZIP)}`);
+                $('#dIndustry').text(html(u.industry||u.Industry));
+                $('#dOrg').text(html(u.employerOrganization||u.EmployerOrganization));
+                $('#dJob').text(html(u.jobTitle||u.JobTitle));
+                $('#dHistCity').text(html(u.historyCity||u.HistoryCity));
+                $('#dLastPos').text(html(u.lastPosition||u.LastPosition));
+                $('#dDept').text(html(u.department||u.Department));
+                const jd = fmt(u.joiningDate||u.JoiningDate); const ld = fmt(u.leavingDate||u.LeavingDate);
+                $('#dJoinLeave').text(`${jd} → ${ld}`);
+
+                const off = new bootstrap.Offcanvas('#detailPanel');
+                off.show();
+            }).fail(xhr => {
+                swal('Failed', `Could not load details (${xhr.status}).`, 'error');
+            });
+        }
+
+        function approve(id){
+            $.post({ url: `${API_BASE}/${id}/approve` })
+             .done(() => { swal('Approved', 'User has been approved.', 'success'); loadPending(); })
+             .fail(xhr => { swal('Failed', xhr.responseText||'Approve failed', 'error'); });
+        }
+
+        function reject(id, reason){
+            $.ajax({
+                url: `${API_BASE}/${id}/reject`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ reason })
+            }).done(() => {
+                swal('Rejected', 'User has been rejected.', 'success');
+                loadPending();
+            }).fail(xhr => {
+                swal('Failed', xhr.responseText||'Reject failed', 'error');
+            });
+        }
+
+        // Events
+        $(function(){
+            // initial state
+            state.pageSize = +$('#pageSize').val();
+            loadPending();
+
+            $('#refreshBtn').on('click', function(){ loadPending(); });
+            $('#pageSize').on('change', function(){ state.pageSize = +$(this).val(); state.page = 1; loadPending(); });
+            $('#searchBox').on('input', function(){ renderTable(); });
+
+            $('#pendingTable').on('click', '.viewBtn', function(){ const id = $(this).closest('tr').data('id'); openDetail(id); });
+            $('#pendingTable').on('click', '.approveBtn', function(){ const id = $(this).closest('tr').data('id'); approve(id); });
+            $('#pendingTable').on('click', '.rejectBtn', function(){ const id = $(this).closest('tr').data('id'); state.selectedId=id; new bootstrap.Modal('#rejectModal').show(); });
+
+            $('#approveBtn').on('click', function(){ if(state.selectedId) approve(state.selectedId); });
+            $('#rejectBtn').on('click', function(){ $('#rejectReason').val(''); new bootstrap.Modal('#rejectModal').show(); });
+            $('#confirmRejectBtn').on('click', function(){ const reason = ($('#rejectReason').val()||'').trim(); if(!reason){ swal('Required','Please enter a reason.','info'); return; } reject(state.selectedId, reason); $('#rejectModal').modal('hide'); });
+        });
+    </script>

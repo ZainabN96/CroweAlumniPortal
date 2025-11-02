@@ -1,0 +1,261 @@
+﻿
+/*body {
+    background-color: #f8f9fa;
+}
+
+.event-section {
+    width: 100%;
+    padding: 1rem;
+}
+
+.event-card {
+    position: relative;
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+    background: #fff;
+    border-radius: .5rem;
+    padding: 1rem 1.5rem;
+    margin-top: 20px;
+}
+
+.share-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.2rem;
+    color: black;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.event-details h5 {
+    font-weight: bold;
+    margin-bottom: .5rem;
+}
+
+.event-meta-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: baseline;
+    font-size: .9rem;
+    color: #444;
+    margin-bottom: .25rem;
+}
+
+    .event-meta-line i {
+        color: black;
+        margin-right: .25rem;
+    }
+
+.address {
+    font-size: .9rem;
+    color: #444;
+    overflow-wrap: break-word;
+    margin-bottom: 0.5rem;
+}
+
+    .address i {
+        color: black;
+        margin-right: .25rem;
+    }
+
+.badge-ongoing,
+.badge-upcoming {
+    background-color: #f7b400;
+    color: #fff;
+    font-size: .9rem;
+    padding: .4rem .8rem;
+    border-radius: 10px;
+}
+
+.btn-view {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    background-color: #005c97;
+    color: #fff;
+    font-weight: 600;
+}
+
+.box {
+    width: 100%;
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,0.15);*/
+    /* border: 1px solid #000; */ /* Removed */
+    /*border-radius: .5rem;
+    padding: 1.5rem;
+    background: #fafafa;
+    margin-bottom: 2rem;
+}
+
+.social-icon {
+    width: 50px;
+    height: 50px;
+    margin: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    border-radius: 50%;
+    text-decoration: none;
+}
+
+.facebook {
+    background: #3b5998;
+}
+
+.whatsapp {
+    background: #25d366;
+}
+
+.linkedin {
+    background: #0077b5;
+}
+
+.telegram {
+    background: #0088cc;
+}
+
+.x {
+    background: #000;
+}
+
+.instagram {
+    background: #e4405f;
+}
+
+.gmail-icon {
+    background: #db4437;
+}
+
+.divider {
+    border-top: 1px solid #ccc;
+    margin: 1rem 0;
+}
+
+.discussion-btn {
+    background-color: #005c97;
+    color: white;
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+    width: 100%;
+    border: none;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    display: block;
+    transition: 0.3s ease;
+}
+
+    .discussion-btn:hover {
+        background-color: #005c97;
+    }
+
+.alumni-box {
+    position: relative;
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+    background: #fff;
+    border-radius: .5rem;
+    padding: 1rem;
+    width: 100%;
+}
+
+.alumni-img {
+    width: 50%;
+    max-height: 280px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+
+.discussion-card {
+    background: #fff;
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,0.1);
+    border-radius: .5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.discussion-container {
+    margin-top: 20px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.discussion-header {
+    display: flex;
+    position: relative;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #eee;
+}
+
+.tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #555;
+    transition: color 0.3s ease;
+}
+
+    .tab:hover {
+        color: #005c97;
+    }
+
+    .tab.active {
+        color: #005c97;
+    }
+
+.tab-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 50%;
+    background-color: #005c97;
+    transition: transform 0.3s ease;
+}
+
+.discussion-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.input-title,
+.textarea-desc {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.textarea-desc {
+    height: 120px;
+    resize: vertical;
+}
+
+.btn-post {
+    align-self: flex-end;
+    background-color: #005c97;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+    .btn-post:hover {
+        background-color: #00447a;
+    }
+
+.hidden {
+    display: none;
+}*/

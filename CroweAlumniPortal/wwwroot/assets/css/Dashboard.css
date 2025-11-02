@@ -1,0 +1,440 @@
+﻿/*.discussion-container {
+    margin-top: 20px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.discussion-header {
+    display: flex;
+    position: relative;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #eee;
+}
+
+.tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #555;
+    transition: color 0.3s ease;
+}
+
+    .tab:hover {
+        color: #005c97;
+    }
+
+    .tab.active {
+        color: #005c97;
+    }
+
+.tab-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 50%;
+    background-color: #005c97;  theme color 
+    transition: transform 0.3s ease;
+}
+
+.discussion-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.input-title,
+.textarea-desc {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.textarea-desc {
+    height: 120px;
+    resize: vertical;
+}
+
+.btn-post {
+    align-self: flex-end;
+    background-color: #005c97;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+    .btn-post:hover {
+        background-color: #00447a;
+    }
+
+.hidden {
+    display: none;
+}
+*/
+
+/*    new css from alisha */
+
+/*    ---------------------------------------------
+       ---------------Findalumnai-------------
+    --------------------------------------------------*/
+/*.background-banner {
+    background-image: url('/assets/img/medium-shot-people-with-glasses-posing-studio.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 300px;
+    width: 100%;
+        margin-top: 20px;
+}
+
+.pagination-btn, .icon-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background-color: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.sear-btn {
+    border: none;
+    padding: 0 15px;
+    color: white;
+}
+
+.sear-btn {
+    background-color: #005c97;
+}
+
+    .sear-btn i {
+        font-size: 18px;
+    }
+
+@media (max-width: 576px) {
+    .pagination-btn, .icon-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+}
+
+.member-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    text-align: center;
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.image-wrapper {
+    position: relative;
+}
+
+.member-img, .missing-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    background-color: #f1f1f1;
+}
+
+.missing-img {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    color: #333;
+    flex-direction: column;
+}
+
+.message-icon {
+    position: absolute;
+    top: 165px;
+    right: 10px;
+    z-index: 1;
+}
+
+    .message-icon img {
+        width: 32px;
+        height: 32px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #fff;
+    }
+
+.btn-message {
+    color: white;
+    font-size: 14px;
+    border-radius: 5px;
+    border: none;
+    padding: 6px 8px;
+}
+
+.btn-message {
+    background-color: #005c97;
+}
+
+.btn-help {
+    color: white;
+    font-size: 14px;
+    border-radius: 5px;
+    border: none;
+    padding: 6px 8px;
+}
+
+.btn-help {
+    background-color: #f7b400;
+}
+
+ Remove hover and active effects for message button 
+.btn-message,
+.btn-message:hover,
+.btn-message:active,
+.btn-message:focus,
+.btn-message:visited {
+    background-color: #005c97 !important;
+    color: white !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+ Remove hover and active effects for help button 
+.btn-help,
+.btn-help:hover,
+.btn-help:active,
+.btn-help:focus,
+.btn-help:visited {
+    background-color: #f7b400 !important;
+    color: white !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+
+.btn-view-section {
+    border-top: 1px solid #ccc;
+    margin-top: 10px;
+    padding-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+    .btn-view-section .btn {
+        flex: 1;
+        min-width: 100px;
+        margin: 0;
+    }
+
+.member-info {
+    padding: 10px 15px;
+}
+
+
+.container-fluid {
+    height: 100vh;
+    display: flex;
+}
+
+.left-sidebar {
+    background: #fff;
+    width: 400px;
+    border-right: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    padding: 1rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.scrollable-section {
+    overflow-y: auto;
+    flex: 1;
+    padding: 1rem;
+}
+
+.btn-blue {
+    color: #fff;
+    font-weight: 500;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.btn-blue {
+    background-color: #005c97;
+}
+
+    .btn-blue:hover,
+    .btn-blue:focus,
+    .btn-blue:active,
+    .btn-blue:visited {
+        background-color: #005c97 !important;
+        color: #fff !important;
+        box-shadow: none !important;
+        outline: none !important;
+        border: none !important;
+        text-decoration: none !important;
+    }
+
+.avatar-circle {
+    background-color: #cce0f5;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: #000;
+}
+
+.text-blue {
+    color: #005c97;
+}
+
+.chat-item,
+.contact-item {
+    margin-bottom: 1rem;
+}
+
+    .contact-item img {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+    }
+
+.chat-area {
+    flex: 1;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.chat-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.chat {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #ddd;
+    margin-left: 200px;
+}
+
+.chat-header h5 {
+    margin: 0;
+    font-weight: bold;
+}
+
+.chat-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-top: 1rem;
+}
+
+.message-box {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.chat-date {
+    text-align: right;
+    font-size: 0.875rem;
+    color: #888;
+    margin-bottom: 0.5rem;
+}
+
+.input-bar {
+    border-top: 1px solid #ddd;
+    padding-top: 0.5rem;
+}
+
+.input-group input {
+    border: none;
+    border-bottom: 2px solid #ccc;
+    border-radius: 0;
+    transition: border-color 0.3s;
+}
+
+    .input-group input:focus {
+        box-shadow: none;
+        border-bottom: 2px solid #005c97;
+    }
+
+.input-group-text {
+    background: transparent;
+    border: none;
+}
+
+.input-group .btn {
+    background-color: #005c97;
+    color: white;
+}
+
+    .input-group .btn:hover {
+        background-color: #004b7d;
+    }
+
+ Scroll Styling 
+.scrollable-section::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollable-section::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 5px;
+}
+
+.chat-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-content::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 5px;
+}
+
+.chat-avatar {
+    background-color: #cce0f5;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+    margin-left: 20px;
+}*/
+

@@ -1,0 +1,531 @@
+﻿@{
+    ViewData["Title"] = "Profile";
+}
+
+ <div class="new-top-bar"></div>
+
+    <div class="container">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 new-custom-sidebar">
+          <div class="new-sidebar-box">
+            <div class="new-sidebar">
+              <a href="#" class="new-active" data-section="photo">Profile photo</a>
+              <a href="#" data-section="basic">Basic details</a>
+              <a href="#" data-section="contact">Contact details</a>
+              <a href="#" data-section="other">Other details</a>
+              <a href="#" data-section="suac">SUAC related experience</a>
+              <a href="#" data-section="work">Other work experience</a>
+              <a href="#" data-section="education">Other education experience</a>
+              <a href="#" data-section="privacy">Privacy settings</a>
+              <a href="#" data-section="email">Email Preferences</a>
+              <a href="#" data-section="account">Account & passwords</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="col-md-9 new-custom-content">
+          <div class="new-content-box">
+            <!-- Profile Photo -->
+            <div id="photo" class="new-content-section new-active text-center">
+              <h4>Edit profile photo</h4>
+                    <img id="profilePhoto" src="~/assets/img/person.png" alt="Profile" class="new-profile-photo mb-3">
+              <div class="d-flex justify-content-center align-items-center">
+                <input type="file" id="photoInput" accept="image/*" hidden />
+                <button class="btn new-btn-primary btn-sm me-2" id="btnChangePhoto">Change Photo</button>
+
+                @* <button class="btn new-btn-primary btn-sm me-2">Change Photo</button> *@
+                <div class="new-menu-container">
+                  <button class="btn btn-outline- btn-sm" id="menuBtn">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <div class="new-menu" id="menuDropdown">
+                    <a href="#">Delete Photo</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Basic Details -->
+            <div id="basic" class="new-content-section">
+              <h4 class="mb-1 fw-semibold">Edit basic details</h4>
+              <p class="text-muted small mb-4">Fields marked <span class="text-danger">*</span> are mandatory</p>
+              <form class="new-mt-3">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">First Name <span class="text-danger">*</span></label>
+                    <input type="text" class="new-form-control">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" class="new-form-control">
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Date of Birth <span class="text-danger">*</span></label>
+                    <input type="date" class="new-form-control">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Current City <span class="text-danger">*</span></label>
+                    <input type="text" class="new-form-control">
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Gender</label>
+                    <select class="new-form-select">
+                      <option selected>Female</option>
+                      <option>Male</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="mb-4">
+                  <label class="form-label">About you</label>
+                  <textarea class="new-form-control" rows="2" placeholder="Tell your network about what you do"></textarea>
+                </div>
+                <div class="d-flex justify-content-end">
+                  <button type="button" class="btn btn-outline-secondary me-2">Cancel</button>
+                  <button type="submit" class="btn new-btn-primary">Save changes</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Contact Details -->
+            <div id="contact" class="new-content-section">
+              <h4 class="mb-1 fw-semibold">Edit contact details</h4>
+              <p class="text-muted small mb-4">Fields marked <span class="text-danger">*</span> are mandatory</p>
+              <div class="mb-3">
+                <label class="form-label">Email <span class="text-danger">*</span></label>
+                <div class="d-flex gap-3">
+                  <input type="email" class="new-form-control">
+                  <a href="#" class="new-add-link">+ Add alternate email</a>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Phone No <span class="text-danger">*</span></label>
+                <div class="d-flex align-items-center gap-3">
+                  <select class="new-form-select w-auto mb-4" style="line-height: 1.5;">
+                    <option selected> +91</option>
+                    <option> +92</option>
+                    <option>  +1</option>
+                  </select>
+                  <input type="tel" class="new-form-control">
+                  <a href="#" class="new-add-link" style="display: inline-flex; align-items: center; height: 38px;">
+                    + Add another phone no.
+                  </a>
+                </div>
+              </div>
+              <h6 class="fw-semibold new-mt-4">Social Profiles</h6>
+              <div class="mb-4">
+                <label class="form-label">LinkedIn Profile Url</label>
+                <input type="url" class="new-form-control">
+              </div>
+              <hr>
+              <h6 class="fw-semibold">Addresses</h6>
+              <p class="mb-1 fw-medium">Current residence</p>
+              <div class="mb-3">
+                <label class="form-label">Current residence address</label>
+                <textarea class="new-form-control" rows="2"></textarea>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">City</label>
+                  <input type="text" class="new-form-control">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Zip-code</label>
+                  <input type="text" class="new-form-control">
+                </div>
+              </div>
+              <div class="mb-4">
+                <a href="#" class="new-add-link">+ Add Office Address</a><br>
+                <a href="#" class="new-add-link">+ Add Permanent Address</a>
+              </div>
+              <div class="d-flex justify-content-end gap-2">
+                <button class="btn btn-outline-secondary">Cancel</button>
+                <button class="btn new-btn-primary">Save changes</button>
+              </div>
+            </div>
+
+            <!-- Other Details -->
+            <div id="other" class="new-content-section">
+              <h4 class="mb-1 fw-semibold">Other details</h4>
+              <p class="text-muted small mb-4">Fields marked <span class="text-danger">*</span> are mandatory</p>
+              <div class="mb-4">
+                <label class="form-label fw-semibold">Current Salary Range</label>
+                <div class="new-form-check"><input class="form-check-input" type="checkbox"><label class="form-check-label">300,000 to 400,000 PKR</label></div>
+                <div class="new-form-check"><input class="form-check-input" type="checkbox"><label class="form-check-label">250,000 to 299,999 PKR</label></div>
+                <div class="new-form-check"><input class="form-check-input" type="checkbox"><label class="form-check-label">200,000 to 249,999 PKR</label></div>
+                <div class="new-form-check"><input class="form-check-input" type="checkbox"><label class="form-check-label">150,000 to 199,999 PKR</label></div>
+                <div class="new-form-check"><input class="form-check-input" type="checkbox"><label class="form-check-label">100,000 to 149,999 PKR</label></div>
+                <div class="new-form-check"><input class="form-check-input" type="checkbox"><label class="form-check-label">50,000 to 99,999 PKR</label></div>
+                <div class="new-form-check"><input class="form-check-input" type="checkbox"><label class="form-check-label">0 to 49,999 PKR</label></div>
+              </div>
+              <div class="mb-4">
+                <label class="form-label">Designation <span class="text-danger">*</span></label>
+                <input type="text" class="new-form-control" placeholder="Designation">
+              </div>
+              <h6 class="fw-semibold new-mt-4">Expertise Details</h6>
+              <label class="form-label">Add Skills</label>
+              <input type="text" id="skillInput" class="new-form-control" placeholder="Type a skill and press Enter">
+              <div id="skillsContainer" class="new-mt-3 d-flex flex-wrap gap-2"></div>
+              <div class="d-flex justify-content-end gap-2 new-mt-4">
+                <button class="btn btn-outline-secondary">Cancel</button>
+                <button class="btn new-btn-primary">Save changes</button>
+              </div>
+            </div>
+
+            <div id="suac" class="new-content-section">
+                        <div class="container-box">
+                            <h4>SUAC related experience</h4>
+                            <!-- Form Section -->
+                            <form id="experienceForm" novalidate>
+                                <div class="mb-3">
+                                    <label class="form-label">Enrollment Number <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="enrollment" placeholder="Enrollment Number">
+                                    <div class="error-msg">Please fill this field</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Program Completed <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="program" placeholder="Program Completed">
+                                        <div class="error-msg">Please fill this field</div>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label class="form-label">Year of Joining <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="joining">
+                                            <option value="">Select</option>
+                                            <option>2018</option>
+                                            <option>2019</option>
+                                            <option>2020</option>
+                                        </select>
+                                        <div class="error-msg">Please fill this field</div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Year of Degree Completion <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="completion">
+                                        <option value="">Select</option>
+                                        <option>2020</option>
+                                        <option>2021</option>
+                                        <option>2022</option>
+                                    </select>
+                                    <div class="error-msg">Please fill this field</div>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary" background-color: #005c97; c>Save changes</button>
+                                    <button type="button" class="btn btn-outline-secondary" id="cancelBtn">Cancel</button>
+                                </div>
+                            </form>
+                            <!-- Display Section -->
+                            <div id="displaySection" class="mt-3" style="display:none;">
+                                <div class="display-card">
+                                    <span class="edit-icon text-primary" id="editBtn">✏️</span>
+                                    <p id="displayEnrollment"></p>
+                                    <p id="displayProgram"></p>
+                                    <p id="displayYears"></p>
+                                    <button class="btn btn-light btn-sm">Alumni</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+              <!-- Display Section -->
+              <div id="displaySection" class="new-mt-3" style="display:none;">
+                <div class="new-display-card">
+                  <span class="new-edit-icon text-primary" id="editBtn">✏️</span>
+                  <p id="displayEnrollment"></p>
+                  <p id="displayProgram"></p>
+                  <p id="displayYears"></p>
+                  <button class="btn btn-light btn-sm">Alumni</button>
+                </div>
+              </div>
+            </div>
+            <div id="work" class="new-content-section"><div class="new-container-box">
+              <h4>Other work experience</h4>
+
+            <!-- Form -->
+            <form id="workForm" novalidate>
+              <h6 class="mb-3">Add new work</h6>
+
+              <div class="mb-3">
+                <label class="form-label">Designation <span class="text-danger">*</span></label>
+                <input type="text" class="new-form-control" id="designation" placeholder="Ex. Field Engineer">
+                <div class="new-error-msg">Please fill this field</div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Company name <span class="text-danger">*</span></label>
+                <input type="text" class="new-form-control" id="company" placeholder="Ex. Google LLC">
+                <div class="new-error-msg">Please fill this field</div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Work Industry <span class="text-danger">*</span></label>
+                <input type="text" class="new-form-control" id="industry" placeholder="Search and select from dropdown">
+                <div class="new-error-msg">Please fill this field</div>
+              </div>
+
+              <div class="new-row">
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">Start date</label>
+                  <select class="new-form-select" id="startMonth">
+                    <option value="">Month</option>
+                    <option>Jan</option><option>Feb</option><option>Mar</option>
+                    <option>Apr</option><option>May</option><option>Jun</option>
+                    <option>Jul</option><option>Aug</option><option>Sep</option>
+                    <option>Oct</option><option>Nov</option><option>Dec</option>
+                  </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">&nbsp;</label>
+                  <select class="new-form-select" id="startYear">
+                    <option value="">Year</option>
+                    <option>2023</option><option>2024</option><option>2025</option>
+                  </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">End date</label>
+                  <select class="new-form-select" id="endMonth">
+                    <option value="">Month</option>
+                    <option>Jan</option><option>Feb</option><option>Mar</option>
+                    <option>Apr</option><option>May</option><option>Jun</option>
+                    <option>Jul</option><option>Aug</option><option>Sep</option>
+                    <option>Oct</option><option>Nov</option><option>Dec</option>
+                  </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">&nbsp;</label>
+                  <select class="new-form-select" id="endYear">
+                    <option value="">Year</option>
+                    <option>2023</option><option>2024</option><option>2025</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mb-3 new-form-check">
+                <input type="checkbox" class="form-check-input" id="currentWork">
+                <label class="form-check-label" for="currentWork">I am currently working here</label>
+              </div>
+
+              <p class="text-primary" style="cursor: pointer;">+ Add work description</p>
+
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn new-btn-primary">Save changes</button>
+                <button type="button" class="btn btn-outline-secondary" id="cancelBtn">Cancel</button>
+              </div>
+            </form>
+
+      <!-- Display Card -->
+      <div id="displaySection" class="new-mt-3" style="display:none;">
+        <div class="new-display-card">
+          <span class="new-edit-icon text-primary" id="editBtn">✏️</span>
+          <p id="displayDesignation"></p>
+          <p id="displayCompany"></p>
+          <p id="displayDates" class="text-muted small"></p>
+        </div>
+      </div>
+    </div>
+    </div>
+            <div id="education" class="new-content-section">    <h4>Other education experience</h4>
+
+        <div class="new-form-section">
+            <label>Name of the Institute *</label>
+            <input type="text" id="institute" placeholder="Enter Institute Name">
+            <div class="new-error" id="errorInstitute"></div>
+
+            <div class="new-row">
+                <div>
+                    <label>Start year</label>
+                    <select id="startYear">
+                        <option value="">Select Admission Year</option>
+                        <option>2017</option>
+                        <option>2018</option>
+                        <option>2019</option>
+                        <option>2020</option>
+                        <option>2021</option>
+                    </select>
+                    <div class="new-error" id="errorStartYear"></div>
+                </div>
+                <div>
+                    <label>End year (or expected)</label>
+                    <select id="endYear">
+                        <option value="">Select Graduation Year</option>
+                        <option>2019</option>
+                        <option>2020</option>
+                        <option>2021</option>
+                        <option>2022</option>
+                        <option>2023</option>
+                    </select>
+                    <div class="new-error" id="errorEndYear"></div>
+                </div>
+            </div>
+
+            <div class="new-row">
+                <div>
+                    <label>Degree</label>
+                    <input type="text" id="degree">
+                    <div class="new-error" id="errorDegree"></div>
+                </div>
+                <div>
+                    <label>Department</label>
+                    <input type="text" id="department">
+                    <div class="new-error" id="errorDepartment"></div>
+                </div>
+            </div>
+
+            <button class="new-save-btn" onclick="addEducation()">Save changes</button>
+            <button class="new-cancel-btn" onclick="clearForm()">Cancel</button>
+        </div>
+
+        <div id="educationList"></div>
+    </div>
+            <div id="privacy" class="new-content-section">
+  
+    
+      <h4>Privacy Settings</h4>
+<div class="new-heading d-flex">
+      <!-- Email Privacy -->
+      <div class="new-privacy-options mb-3 ">
+        <p class="fw-semibold">Who can see my e-mail id:</p>
+        <div class="new-form-check">
+          <input class="form-check-input" type="radio" name="emailPrivacy" id="emailEveryone">
+          <label class="form-check-label" for="emailEveryone">Everyone</label>
+        </div>
+        <div class="new-form-check">
+          <input class="form-check-input" type="radio" name="emailPrivacy" id="emailNone" checked>
+          <label class="form-check-label" for="emailNone">None</label>
+        </div>
+      </div>
+
+      <!-- Phone Privacy -->
+      <div class="new-privacy-options mb-3">
+        <p class="fw-semibold ">Who can see my phone no.:</p>
+        <div class="new-form-check">
+          <input class="form-check-input" type="radio" name="phonePrivacy" id="phoneEveryone">
+          <label class="form-check-label" for="phoneEveryone">Everyone</label>
+        </div>
+        <div class="new-form-check">
+          <input class="form-check-input" type="radio" name="phonePrivacy" id="phoneNone" checked>
+          <label class="form-check-label" for="phoneNone">None</label>
+        </div>
+      </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="new-mt-4 d-flex justify-content-end">
+        <button class="new-btnnn new-btn-second">Cancel</button>
+        <button class="new-btnnn new-btn-save">Save changes</button>
+      </div>
+    
+  
+</div>
+
+            <div id="email" class="new-content-section"><h4 class="mb-4">Email preferences</h4>
+
+      <!-- Mails from institute -->
+      <div class="new-form-check">
+        <input class="form-check-input" type="checkbox" id="instituteMails">
+        <label class="form-check-label" for="instituteMails">
+          Mails from institute
+        </label>
+        <small>
+          Mails sent by institute (admins) such as updates, official announcements, ongoing campaigns, upcoming events, etc.
+        </small>
+      </div>
+
+      <!-- Transactional mails -->
+      <div class="new-form-check">
+        <input class="form-check-input" type="checkbox" id="transactionalMails" checked disabled>
+        <label class="form-check-label" for="transactionalMails">
+          Transactional mails
+        </label>
+        <small>
+          Mails such as payment transaction, event registration confirmation, change password, etc.
+        </small>
+      </div>
+
+      <!-- System-generated mails -->
+      <div class="new-form-check">
+        <input class="form-check-input" type="checkbox" id="systemMails">
+        <label class="form-check-label" for="systemMails">
+          System-generated mails
+        </label>
+        <small>
+          Mails such as job notifications, network updates, birthday wishes, profile update notifications, etc.
+        </small>
+      </div>
+
+      <p class="new-mt-4">
+        We would love to have a feedback from you as it would help us in delivering better service to all of our members.
+      </p>
+
+      <!-- Dropdown reason -->
+      <select class="new-form-select">
+        <option selected disabled>Please select a reason</option>
+        <option>I am no longer interested</option>
+        <option>I am receiving too many emails</option>
+        <option>I no longer use this email address</option>
+        <option>I am already receiving these emails on another email address</option>
+        <option>I don’t remember signing up on this platform</option>
+        <option>Other</option>
+      </select>
+
+      <!-- Buttons -->
+      <div class="new-mt-4 d-flex justify-content-end">
+        <button class="new-btnnn new-btn-second">Cancel</button>
+        <button class="new-btnnn new-btn-save">Save changes</button>
+      </div></div>
+            <div id="account" class="new-content-section"> <h4>Account & Password Settings</h4>
+
+        <!-- Connect Social -->
+        <div class="new-section">
+          <h6>Connect / Disconnect with social profiles</h6>
+          <p class="text-muted">Connect social media profiles for effortless networking and enhanced visibility</p>
+          
+          <button class="new-social-btn">
+            @* <img src="./logo_15465679.png" alt="Google"> *@
+            Connect with Google
+          </button>
+          <button class="new-social-btn">
+            <i class="fab fa-facebook" style="color:#1877F2;"></i>
+            Connect with Facebook
+          </button>
+          <button class="new-social-btn">
+            <i class="fab fa-linkedin" style="color:#0A66C2;"></i>
+            Connect with LinkedIn
+          </button>
+        </div>
+
+        <!-- Change Password -->
+        <div class="new-section">
+          <h6>Change password</h6>
+          <p class="text-muted">An email will be sent to registered email id with instructions to set new password</p>
+          <button class="btn btn-outline-secondary new-btn-action">Send email to change password</button>
+        </div>
+
+        <!-- Delete Account -->
+        <div>
+          <h6>Delete account</h6>
+          <p class="text-muted">If you do not wish to continue being a member of this network, you may request the admin to delete your account.</p>
+          <button class="btn new-btn-delete new-btn-action">Delete account</button>
+          
+          <p class="text-muted new-mt-3">If you are someone else using the account of a demised person, kindly contact the admin to request that it be marked as demised.</p>
+          <button class="btn new-btn-demised new-btn-action">Mark as demised</button>
+        </div></div>
+
+          </div>
+        </div>
+        </div>
+    </div>
+  </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="~/assets/js/ajax/alumni/profile.js"></script>
+
+
+    

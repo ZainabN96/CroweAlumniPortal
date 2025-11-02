@@ -1,0 +1,446 @@
+﻿@model CroweAlumniPortal.Helper.EventsDashboardVm
+@{
+    ViewData["Title"] = "Dashboard";
+}
+<div class="container my-5">
+    <div class="row">
+        <!-- LEFT SIDE -->
+        <div class="col-md-4 d-flex flex-column align-items-start">
+            <div class="crw-box text-center">
+                <div class="d-flex align-items-center mb-3">
+                    <div id="profileImgWrapper"></div>
+                   
+                    <div class="ms-3 text-start">
+                        <h5 class="mb-0 userName"></h5>
+                        <small class="text-muted" id="role"></small>
+                    </div>
+                </div>
+                <hr>
+            </div>
+
+            <div class="crw-box2 text-center">
+                <h5 class="mb-3">Invite your connections to join Crow community</h5>
+                <div class="crw-divider"></div>
+
+                <div class="row justify-content-center g-2">
+                    <!-- Facebook -->
+                    <div class="col-auto">
+                        <a href="#" class="crw-social-icon crw-facebook js-share" data-net="facebook" title="Share on Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                    </div>
+
+                    <!-- WhatsApp -->
+                    <div class="col-auto">
+                        <a href="#" class="crw-social-icon crw-whatsapp js-share" data-net="whatsapp" title="Share on WhatsApp">
+                            <img src="~/assets/img/whatsapp_icon.png" alt="whatsapp" class="crw-social-img" />
+                        </a>
+                    </div>
+
+                    <!-- LinkedIn -->
+                    <div class="col-auto">
+                        <a href="#" class="crw-social-icon crw-linkedin js-share" data-net="linkedin" title="Share on LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+@* 
+                    <!-- Email -->
+                    <div class="col-auto">
+                        <a href="#" class="crw-social-icon crw-email js-share" data-net="email" title="Share via Email">
+                            <img src="~/assets/img/email-icon.png" alt="email" class="crw-social-img" />
+                        </a>
+                    </div>
+
+                    <!-- Telegram -->
+                    <div class="col-auto">
+                        <a href="#" class="crw-social-icon crw-telegram js-share" data-net="telegram" title="Share on Telegram">
+                            <i class="fab fa-telegram-plane"></i>
+                        </a>
+                    </div>
+
+                    <!-- Copy Link (for Instagram etc.) -->
+                    <div class="col-auto">
+                        <a href="#" class="crw-social-icon crw-copy js-share" data-net="copy" title="Copy invite link">
+                            <i class="bi bi-link-45deg"></i>
+                        </a>
+                    </div> *@
+                </div>
+            </div>
+
+            @* <div class="crw-box2 text-center">
+                <h5 class="mb-3">Invite your connections to join Crow community</h5>
+                <div class="crw-divider"></div>
+                <div class="row justify-content-center">
+                    <div class="col-auto"><a href="#" class="crw-social-icon crw-facebook"><i class="fab fa-facebook-f"></i></a></div>
+                    <div class="col-auto">
+                        <a href="#" class="crw-social-icon crw-instagram"><img src="~/assets/img/whatsapp_icon.png" alt="whatsapp" class="crw-social-img" /> </a>
+                    </div>
+                    <div class="col-auto"><a href="#" class="crw-social-icon crw-linkedin"><i class="fab fa-linkedin-in"></i></a></div>
+                    <div class="w-100"></div>
+                    @* <div class="col-auto">
+                        <a href="#" class="crw-social-icon"><img src="~/assets/img/email-icon.png" alt="gmail" class="crw-social-img" /> </a>
+                    </div>
+                    <div class="col-auto"><a href="#" class="crw-social-icon crw-telegram"><i class="fab fa-telegram-plane"></i></a></div>
+                    <div class="col-auto">
+                        <a href="#" class="crw-social-icon crw-instagram"><img src="~/assets/img/instagram_2626270.png" alt="Instagram" class="crw-social-img" /> </a>
+                    </div> 
+                </div>
+            </div> *@
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="col-md-8">
+            <div class="crw-event-section">
+                <button class="crw-discussion-btn" onclick="toggleDiscussion()">+ Start a Discussion</button>
+
+                <div class="crw-discussion-container d-none">
+                    <div class="crw-discussion-header">
+                        <div class="crw-tab active" data-tab="post">Start a Discussion/ Post</div>
+                        <div class="crw-tab d-none" data-tab="poll" id="newEventTab">New Event</div>
+
+                        <div class="crw-tab-indicator"></div>
+                    </div>
+
+                    <!-- Discussion TAB -->
+                    <div class="crw-discussion-body" id="post-tab">
+                        <input id="postTitle" type="text" placeholder="Enter title" class="crw-input-title" />
+                        <textarea id="postText" placeholder="Write your thought..." class="crw-textarea-desc"></textarea>
+                        <input type="file" id="postImage" accept="image/*,video/*" hidden />
+                        <!-- PREVIEW -->
+                        <div id="postPreview" class="mt-2" style="display:none;"></div>
+                        <div id="composerPreview" class="mt-2"></div>
+
+                        <!-- ICONS SECTION -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex gap-3">
+                                <i class="fa-solid fa-image text-success fs-5" onclick="$('#postImage').click()"></i>
+                                @* <i class="fa-solid fa-video text-danger fs-5" onclick="$('#postImage').click()"></i>
+                                <i class="fa-solid fa-face-smile text-warning fs-5" id="emojiBtn"></i> *@
+                            </div>
+                            <button class="crw-btn-post" onclick="submitPost()">Post</button>
+                        </div>
+                    </div>
+
+                    <!-- EVENT TAB (hidden by default) -->
+                    <div class="crw-discussion-body hidden" id="poll-tab">
+                        <form id="eventForm">
+                            <div class="row">
+                                <div class="col">
+                                    <label for="title">Event Title</label>
+                                    <input type="text" id="title" name="title" placeholder="Title" class="crw-input-title" required />
+                                </div>
+                                <div class="col">
+                                    <label for="address">Event Address</label>
+                                    <input type="text" id="address" name="address" placeholder="Address" class="crw-input-title" required />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col">
+                                    <label for="startDate">Start Date & Time</label>
+                                    <input type="datetime-local" id="startDate" name="startDate" class="crw-input-title" required />
+                                </div>
+                                <div class="col">
+                                    <label for="endDate">End Date & Time</label>
+                                    <input type="datetime-local" id="endDate" name="endDate" class="crw-input-title" required />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col">
+                                    <label for="registrationLink">Registration Link</label>
+                                    <input type="url" id="registrationLink" name="registrationLink" placeholder="https://example.com/register" class="crw-input-title" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col">
+                                    <label for="description">Event Description</label>
+                                    <textarea id="description" name="description" placeholder="What's the event about" class="crw-textarea-desc" required></textarea>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="crw-btn-post mt-2">Add Event</button>
+                        </form>
+
+                    </div>
+                </div>
+
+                <!-- Event Cards -->
+                <div class="crw-event">
+                    <!-- ... your discussion / form code stays same ... -->
+                    <!-- Dynamic Ongoing -->
+                    @if (Model.Ongoing.Any())
+                    {
+                        <h5 class="mt-4 mb-2">Ongoing Events</h5>
+                        @foreach (var ev in Model.Ongoing)
+                        {
+                            @await Html.PartialAsync("_EventCard", ev)
+                        }
+                    }
+
+                    <!-- Dynamic Upcoming -->
+                    @if (Model.Upcoming.Any())
+                    {
+                        <h5 class="mt-4 mb-2">Upcoming Events</h5>
+                        @foreach (var ev in Model.Upcoming)
+                        {
+                            @await Html.PartialAsync("_EventCard", ev)
+                        }
+                    }
+
+                    <!-- Dynamic Past -->
+                    @if (Model.Past.Any())
+                    {
+                        <h5 class="mt-4 mb-2">Recent Past</h5>
+                        @foreach (var ev in Model.Past)
+                        {
+                            @await Html.PartialAsync("_EventCard", ev)
+                        }
+                    }
+
+                </div>
+                <div id="postContainer"></div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="~/assets/js/ajax/event/createevent.js"></script>
+<script src="~/assets/js/ajax/post/create.js"></script>
+
+<script>
+    //debugger;
+    const userT = sessionStorage.getItem("userType");
+    if (userT === "Admin") {
+        document.getElementById("newEventTab").classList.remove("d-none");
+    }
+
+    var ID = sessionStorage.getItem('id');
+    function toggleDiscussion() {
+        const form = document.querySelector(".crw-discussion-container");
+        const button = document.querySelector(".crw-discussion-btn");
+        form.classList.toggle("d-none");
+        button.classList.toggle("mb-4", !form.classList.contains("d-none"));
+    }
+
+    const tabs = document.querySelectorAll('.crw-tab');
+    const indicator = document.querySelector('.crw-tab-indicator');
+    const bodies = {
+        post: document.getElementById('post-tab'),
+        poll: document.getElementById('poll-tab')
+    };
+
+    tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        Object.keys(bodies).forEach(key => bodies[key].classList.add('hidden'));
+        bodies[tab.getAttribute('data-tab')].classList.remove('hidden');
+        indicator.style.transform = `translateX(${index * 100}%)`;
+        });
+    });
+    function renderProfile(user) {
+        const wrapper = document.getElementById("profileImgWrapper");
+        wrapper.innerHTML = ""; // clear previous
+
+        if (user.profilePicturePath) {
+            // Agar image available hai
+            const img = document.createElement("img");
+            img.src = user.profilePicturePath;
+            img.alt = user.firstName + " " + user.lastName;
+            img.className = "rounded-circle";
+            img.style.width = "60px";
+            img.style.height = "60px";
+            img.style.objectFit = "cover";
+            wrapper.appendChild(img);
+        } else {
+            const initials =
+                (user.firstName?.charAt(0) || "") +
+                (user.lastName?.charAt(0) || "");
+
+            const div = document.createElement("div");
+            div.className = "rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center";
+            div.style.width = "60px";
+            div.style.height = "60px";
+            div.style.fontWeight = "bold";
+            div.style.fontSize = "20px";
+            div.innerText = initials.toUpperCase();
+            wrapper.appendChild(div);
+        }
+
+        document.querySelector(".userName").textContent =
+            `${user.firstName || ""} ${user.lastName || ""}`;
+        document.getElementById("role").textContent = user.userType || "";
+    }
+
+    const user = {
+        firstName: "Sara",
+        lastName: "Bashir",
+        profilePicturePath: "", 
+        role: "Alumni"
+    };
+
+    $.ajax({
+        type: 'GET',
+        url: `/api/user/get/${ID}`,
+        dataType: "json",
+        async: false,
+        contentType: "application/json",
+        headers: {
+            'Authorization': 'Bearer '
+        },
+        success: function (ok, textStatus, xhr) {
+            renderProfile(ok);
+        }
+    });
+
+    (function(){
+      const shareUrl   = window.location.origin + "/invite";
+      const shareTitle = "Join the Crow community";
+      //const shareText  = "Crow community mein shamil ho! Alumni, events aur opportunities tumhara wait kar rahi hain.";
+      const shareText  = "Be part of a trusted network of Crowe alumni discover events, opportunities, and meaningful connections. Join us today.\n\n";
+      const emailSubject = "Invitation: Join the Crowe Alumni Community";
+      const emailBody =
+        "Hello,\n\n" +
+        "I’d like to invite you to join the Crowe Alumni Community a professional network where former colleagues stay connected, discover events, and access new opportunities.\n\n" +
+        "Join using the link below:\n" +
+        "{LINK}\n\n" +
+        "Best regards,\n" +
+        "{YOUR_NAME}";
+          const enc = encodeURIComponent;
+          function popup(url){
+            const w = 740, h = 560;
+            const y = window.top.outerHeight/2 + window.top.screenY - (h/2);
+            const x = window.top.outerWidth/2  + window.top.screenX - (w/2);
+            window.open(url, "_blank", `toolbar=0,location=0,status=0,menubar=0,scrollbars=1,resizable=1,width=${w},height=${h},top=${y},left=${x}`);
+          }
+
+      // document.querySelectorAll(".js-share").forEach(a=>{
+      //   a.addEventListener("click", function(e){
+      //     e.preventDefault();
+      //     const net = this.dataset.net;
+
+      //     const urlWithUtm = `${shareUrl}?utm_source=${net}&utm_medium=social&utm_campaign=invite`;
+      //     const urlWithUtm = `${shareUrl}/Home/Login`;
+
+      //     let shareLink = "";
+      //     switch(net){
+      //       case "facebook":
+      //         shareLink = `https:www.facebook.com/sharer/sharer.php?u=${enc(urlWithUtm)}`;
+      //         return popup(shareLink);
+
+      //       case "linkedin":
+      //         shareLink = `https:www.linkedin.com/sharing/share-offsite/?url=${enc(urlWithUtm)}`;
+      //         return popup(shareLink);
+
+      //       case "whatsapp":
+      //         shareLink = `https:api.whatsapp.com/send?text=${enc(shareTitle + " - " + shareText + urlWithUtm)}`;
+      //         return popup(shareLink);
+
+      //       case "telegram":
+      //         shareLink = `https:t.me/share/url?url=${enc(urlWithUtm)}&text=${enc(shareText)}`;
+      //         return popup(shareLink);
+
+      //       case "email":
+      //         shareLink = `mailto:?subject=${enc(emailSubject)}&body=${enc(emailBody + "\n\n" + urlWithUtm)}`;
+      //         return (window.location.href = shareLink);
+
+      //       case "copy":
+      //         navigator.clipboard.writeText(urlWithUtm)
+      //           .then(()=> {
+      //             if (window.bootstrap) {
+      //               alert("Invite link copied!");
+      //             } else {
+      //               alert("Invite link copied!");
+      //             }
+      //           })
+      //           .catch(()=> alert("Could not copy link."))
+      //         return;
+
+      //       default:
+      //         return;
+      //     }
+      //   });
+      // });
+          (function(){
+      const enc = encodeURIComponent;
+
+      // 1) Always use an absolute URL
+      const shareUrl   = new URL("/Home/Login", window.location.origin).href;
+      const shareTitle = "Join the Crow community";
+      const shareText  = "Alumni, events aur opportunities tumhara wait kar rahi hain.";
+      const emailSubject = "Crow Community Invite";
+      const emailBody    = `${shareTitle}\n\n${shareText}\n${shareUrl}`;
+
+      function popup(url){
+        const w = 740, h = 560;
+        const y = window.top.outerHeight/2 + window.top.screenY - (h/2);
+        const x = window.top.outerWidth/2  + window.top.screenX - (w/2);
+        window.open(url, "_blank",
+          `toolbar=0,location=0,status=0,menubar=0,scrollbars=1,resizable=1,width=${w},height=${h},top=${y},left=${x}`);
+      }
+
+      document.querySelectorAll(".js-share").forEach(a=>{
+        a.addEventListener("click", async function(e){
+          e.preventDefault();
+          const net = this.dataset.net;
+
+          // 2) On mobile, let users pick any contact/app
+          if (navigator.share && (net === "system" || net === "whatsapp" || net === "telegram")) {
+            try {
+              await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
+              return;
+            } catch(_) { /* fall through to specific handlers */ }
+          }
+
+          let shareLink = "";
+          switch(net){
+
+            case "facebook":
+              shareLink = `https://www.facebook.com/sharer/sharer.php?u=${enc(shareUrl)}`;
+              return popup(shareLink);
+
+            case "linkedin":
+              shareLink = `https://www.linkedin.com/sharing/share-offsite/?url=${enc(shareUrl)}`;
+              return popup(shareLink);
+
+            case "whatsapp":
+              // add a newline before URL for better preview
+              shareLink = `https://api.whatsapp.com/send?text=${enc(`${shareTitle} - ${shareText}\n${shareUrl}`)}`;
+              return popup(shareLink);
+
+            case "telegram":
+              shareLink = `https://t.me/share/url?url=${enc(shareUrl)}&text=${enc(`${shareTitle} - ${shareText}`)}`;
+              return popup(shareLink);
+
+            case "email":
+              shareLink = `mailto:?subject=${enc(emailSubject)}&body=${enc(emailBody)}`;
+              window.location.href = shareLink;
+              return;
+
+            case "messenger":
+              // 3) Requires a Facebook App ID
+              const FB_APP_ID = "YOUR_FACEBOOK_APP_ID";
+              shareLink = `https://www.facebook.com/dialog/send?link=${enc(shareUrl)}&app_id=${FB_APP_ID}&redirect_uri=${enc(shareUrl)}`;
+              return popup(shareLink);
+
+            case "copy":
+              navigator.clipboard.writeText(shareUrl)
+                .then(()=> alert("Invite link copied!"))
+                .catch(()=> alert("Could not copy link."));
+              return;
+
+            default:
+              return;
+          }
+        });
+      });
+    })();
+
+    })();
+
+
+</script>

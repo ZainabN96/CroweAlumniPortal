@@ -1,0 +1,88 @@
+﻿@model CroweAlumniPortal.Models.Event
+@{
+    ViewData["Title"] = "Event Detail";
+    string F(DateTime dt) => dt.ToString("dddd, MMM dd, yyyy – h:mm tt");
+    string BadgeText()
+    {
+        var now = DateTime.Now;
+        if (Model.StartDateTime <= now && Model.EndDateTime >= now) return "Ongoing Event";
+        if (Model.StartDateTime > now) return "Upcoming Event";
+        return "Ended";
+    }
+    string BadgeClass()
+    {
+        var now = DateTime.Now;
+        if (Model.StartDateTime <= now && Model.EndDateTime >= now) return "crw-badge-ongoing";
+        if (Model.StartDateTime > now) return "crw-badge-upcoming";
+        return "crw-badge-ended";
+    }
+}
+
+    <!-- HEADER -->
+    <div class="container-fluid bg-dark-header">
+        <h2>@Model.Title</h2>
+        <p>
+            <i class="bi bi-calendar3 me-2"></i>@F(Model.StartDateTime)
+            <span class="ms-3">—</span>
+            <i class="bi bi-calendar-check ms-3 me-2"></i>@F(Model.EndDateTime)
+        </p>
+    </div>
+
+    <!-- MAIN BODY -->
+    <div class="container mt-4">
+        <div class="row justify-content-between">
+            <!-- LEFT -->
+            <div class="col-12 col-lg-4 left-section">
+                <div class="section-box">
+                    <h5><strong>Date & Time:</strong></h5>
+                    <p><strong>Start:</strong> @F(Model.StartDateTime)</p>
+                    <p><strong>End:</strong> @F(Model.EndDateTime)</p>
+                    <p class="text-muted">(Pakistan Standard Time)</p>
+
+                    <span class="@BadgeClass() btn btn-sm mt-3 mb-3">@BadgeText()</span>
+
+                    @* <div class="social-icons mt-2">
+                        <i class="fab fa-facebook" title="Share"></i>
+                        <i class="fab fa-whatsapp" title="Share"></i>
+                        <i class="fab fa-linkedin" title="Share"></i>
+                        <i class="fab fa-twitter" title="Share"></i>
+                        <i class="fab fa-instagram" title="Share"></i>
+                        <i class="fas fa-copy" title="Copy link"
+                           onclick="navigator.clipboard.writeText(window.location.href)"></i>
+                    </div> *@
+
+                    @if (!string.IsNullOrWhiteSpace(Model.RegistrationLink))
+                    {
+                        <div class="text-center mt-4">
+                            <a class="btn btn-register" target="_blank" rel="noopener" href="@Model.RegistrationLink">Register</a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="col-12 col-lg-7 right-section">
+                <div class="section-box">
+                    <!-- Address -->
+                    <div class="section-title">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <span>ADDRESS</span>
+                    </div>
+                    <p>@Model.Address</p>
+
+                    <hr class="divider">
+
+                    <!-- Description -->
+                    <div class="section-title">
+                        <strong><i class="bi bi-justify-left"></i></strong>
+                        <span>DESCRIPTION</span>
+                    </div>
+                    <p>@Model.Description</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a class="btn btn-outline-secondary btn-sm" href="@Url.Action("Dashboard", "Dashboard")">← Back to Dashboard</a>
+        </div>
+    </div>

@@ -1,0 +1,152 @@
+﻿            
+@{
+    ViewData["Title"] = "Announcement Page";
+}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card p-5">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="page-title">Announcements</h3>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a asp-action="AlumniForm" asp-controller="Alumni">Become A member</a></li>
+                            <li class="breadcrumb-item active">Announcements</li>
+                        </ul>
+                    </div>
+                    <div class="row">
+                        <input type="hidden" id="crowe" />
+                        <input type="hidden" id="Crowe" />
+
+                        <div class="col-sm-6 col-md-4 col-lg-2 col-xl-3 col-12 mb-4">
+                            <div class="form-floating form-focus">
+                                <select class="form-control form-select form-select-md" id="Entrysource">
+                                    <option value="" selected disabled>Entry Source </option>
+                                    <option value="Crowe">Crowe</option>
+                                    <option value="Crowe">Crowe</option>
+                                       
+                                </select>
+                                <label for="EntrySource">Select Entry Source</label>
+                            </div>
+                        </div>
+                        <input type="hidden" id="Graduate" />
+                        <input type="hidden" id="UnderGraduate" />
+                        <input type="hidden" id="PostGraduate" />
+
+                        <div class="col-sm-6 col-md-4 col-lg-2 col-xl-3 col-12 mb-4">
+                            <div class="form-floating form-focus">
+                                <select class="form-control form-select form-select-md" id="qualification">
+                                    <option value="" selected disabled>Qualification </option>
+                                    <option value="Work From Office">Graduate</option>
+                                    <option value="Work From Client Side">UnderGraduate</option>
+                                    <option value="Work From Home">PostGraduate</option>
+                                </select>
+                                <label for="Qualification">Select Qualification </label>
+                            </div>
+                        </div>
+                        <input type="hidden" id="2021" />
+                        <input type="hidden" id="2022" />
+                        <input type="hidden" id="2023" />
+
+                        <div class="col-sm-6 col-md-4 col-lg-2 col-xl-3 col-12 mb-4">
+                            <div class="form-floating form-focus">
+                                <select class="form-control form-select form-select-md" id="year">
+                                    <option value="" selected disabled>Year</option>
+                                    <option value="Work From Office">2021</option>
+                                    <option value="Work From Office">2022</option>
+                                    <option value="Work From Office">2023</option>
+                                       
+                                </select>
+                                <label for="year">Select Year</label>
+                            </div>
+                        </div>
+                        <input type="hidden" id="Lahore" />
+                        <input type="hidden" id="Islamabad" />
+                        <input type="hidden" id="Karachi" />
+                        <input type="hidden" id="Multan" />
+                        <input type="hidden" id="Faisalabad" />
+
+                        <div class="col-sm-6 col-md-4 col-lg-2 col-xl-3 col-12 mb-4">
+                            <div class="form-floating form-focus">
+                                <select class="form-control form-select form-select-md" id="currentlocation">
+                                    <option value="" selected disabled>Current Location</option>
+                                    <option value="Lahore">Lahore</option>
+                                    <option value="Islamabad">Islamabad</option>
+                                    <option value="Karachi">Karachi</option>
+                                    <option value="Multan">Multan</option>
+                                    <option value="Faisalabad">Faisalabad</option>
+                                </select>
+                                <label for="location">Select Current Location</label>
+                            </div>
+                        </div>
+                        <input type="hidden" id="Audit" />
+                        <input type="hidden" id="CorporateAdvisory" />
+                        <input type="hidden" id="FinancialAdvisory" />
+                        <input type="hidden" id="Finance" />
+                        <input type="hidden" id="HRAdmin" />
+                        <input type="hidden" id="InformationTechnology" />
+                        <input type="hidden" id="RiskAdvisory" />
+                        <input type="hidden" id="Tax" />
+
+                        <div class="col-sm-6 col-md-4 col-lg-2 col-xl-3 col-12 mb-4">
+                            <div class="form-floating form-focus">
+                                <select class="form-control form-select form-select-md" id="department">
+                                    <option value="" selected disabled>Department</option>
+                                    <option value="Audit">Audit</option>
+                                    <option value="Corporate Advisory">Corporate Advisory</option>
+                                    <option value="Financial Advisory">Financial Advisory</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="HR & Admin">HR & Admin</option>
+                                    <option value="IT">Information Technology (IT)</option>
+                                    <option value="Risk Advisory">Risk Advisory</option>
+                                    <option value="Tax">Tax</option>
+                                </select>
+                                <label for="Department">Select Department</label>
+                            </div>
+                        </div>
+
+                    </div>
+                       
+                        <div class="row">
+                            <div class="col-md-12 mt-5">
+                                <div class="table-responsive">
+                                    <table class="table table-striped custom-table" id="JobReqTable">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 30px;">#</th>
+                                                <th>Title</th>
+                                                <th>Full Name</th>
+                                                <th>Member</th>
+                                                <th>Qualification</th>
+                                                <th>Address</th>
+                                                <th>Mobile Number</th>
+                                                <th>Email </th>
+                                                    <th>Last Position Held</th> 
+                                                <th>Current Organization</th>
+                                                    
+                                                <th class="text-right">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="AddJobRow">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    
+<script src="~/assets/js/jquery-3.5.1.js"></script>
+<script src="~/assets/js/jquery.datatables.min.js"></script>
+<script src="~/assets/vendor/datatables/datatables.js"></script>
+<script src="~/assets/vendor/datatables/datatables.min.js"></script>
+
+
+
+
+
+
