@@ -17,5 +17,7 @@ namespace CroweAlumniPortal.Data.IServices
         Task<List<object>> QueryLatestCompactAsync(int take = 10);
         Task<int?> GetOwnerIdAsync(int postId);
         Task<Post?> GetByIdAsync(int id);
+        Task SoftDeleteAsync(int id, string deletedBy);
+        Task RestoreAsync(long id);
     }
 }

@@ -54,9 +54,8 @@ namespace CroweAlumniPortal.Controllers.api
         [HttpGet("{conversationId:int}/messages")]
         public async Task<IActionResult> Messages(int conversationId, int take = 50, int? beforeId = null)
         {
-            var list = await chat.GetMessagesAsync(conversationId, take, beforeId); // returns List<Message>
+            var list = await chat.GetMessagesAsync(conversationId, take, beforeId); 
 
-            // distinct senders -> names/avatars fetch once
             var senderIds = list.Select(m => m.SenderId).Distinct().ToList();
             var users = await uow.UserService.ListByIdsAsync(senderIds);
             var map = users.ToDictionary(
@@ -93,39 +92,6 @@ namespace CroweAlumniPortal.Controllers.api
                 path = await fileService.SaveFileAsync(media, "assets/img/uploads/chat");
             }
             var msg = await chat.SendAsync(conversationId, myId, body, type, path);
-
-            // 🔊 live to group
-            //await hub.Clients.Group($"convo-{conversationId}").SendAsync("message", new
-            //{
-            //    msg.Id,
-            //    msg.Body,
-            //    msg.MediaPath,
-            //    msg.MediaType,
-            //    msg.SenderId,
-            //    msg.CreatedOn,
-            //    conversationId
-            //});
-
-            //// 🔔 notification to other members
-            //var memberIds = (await uow.ChatService.ListForUserAsync(myId))
-            //                 .First(c => c.Id == conversationId).Members
-            //                 .Select(m => m.UserId).Where(id => id != myId).ToList();
-
-            //var meUser = await uow.UserService.Get(myId);
-            //var meName = $"{meUser?.FirstName} {meUser?.LastName}".Trim();
-
-            //await notificationService.CreateAsync(
-            //    new Notification
-            //    {
-            //        Type = "message",
-            //        Title = "New Message",
-            //        Message = $"{meName}: {(string.IsNullOrWhiteSpace(body) ? "Sent an attachment" : body)}",
-            //        Url = $"/Message/Inbox?c={conversationId}"
-            //    },
-            //    memberIds
-            //);
-
-            //return Ok(new { msg.Id });
             var memberIds = (await uow.ChatService.ListForUserAsync(myId))
                  .FirstOrDefault(c => c.Id == conversationId)?
                  .Members?.Select(m => m.UserId)
@@ -165,7 +131,6 @@ namespace CroweAlumniPortal.Controllers.api
         [Produces("application/json")]
         public async Task<IActionResult> Seen(int conversationId)
         {
-            //var me = Context.Session.GetString("UserId");
             var me = HttpContext.Session.GetString("UserId");
             if (!int.TryParse(me, out var myId)) return Unauthorized();
 
@@ -182,24 +147,17 @@ namespace CroweAlumniPortal.Controllers.api
             return Ok(n);
         }
 
-        /*[HttpGet("unread/count")]
-        public async Task<IActionResult> UnreadCount()
-        {
-            var me = HttpContext.Session.GetString("UserId");
-            if (!int.TryParse(me, out var myId)) return Unauthorized();
-            var n = await chat.CountUnreadAsync(myId);
-            return Ok(n);
-        }*/
-        // GET /api/chat/list  -> sidebar ke liye
+        // GET /api/chat/list
+
         [HttpGet("list")]
         public async Task<IActionResult> List()
         {
             var meStr = HttpContext.Session.GetString("UserId");
             if (!int.TryParse(meStr, out var me)) return Unauthorized();
 
-            var convos = await uow.ChatService.ListForUserAsync(me); // ye Members + Users la raha
+            var convos = await uow.ChatService.ListForUserAsync(me); 
 
-            // sidebar projection (1:1 ke liye other person, group ke liye title)
+            // sidebar projection
             var data = convos.Select(c =>
             {
                 var others = c.Members.Where(m => m.UserId != me).Select(m => m.User).ToList();
@@ -213,14 +171,13 @@ namespace CroweAlumniPortal.Controllers.api
                 if (c.IsGroup == true)
                 {
                     title = string.IsNullOrWhiteSpace(c.Title) ? "Group" : c.Title!;
-                    // group avatar optional
                     avatar = null;
                 }
                 else
                 {
                     var o = others.FirstOrDefault();
                     title = (o?.FirstName + " " + o?.LastName).Trim();
-                    avatar = o?.ProfilePicturePath; // <-- apne User model ka DP path property use karein;
+                    avatar = o?.ProfilePicturePath; 
                 }
 
                 return new
@@ -240,7 +197,7 @@ namespace CroweAlumniPortal.Controllers.api
             return Ok(data);
         }
 
-        // GET /api/chat/{conversationId}/header  -> header ke liye DP + name
+        // GET /api/chat/{conversationId}/header 
         [HttpGet("{conversationId:int}/header")]
         public async Task<IActionResult> Header(int conversationId)
         {
@@ -258,7 +215,7 @@ namespace CroweAlumniPortal.Controllers.api
                 {
                     Title = (other.FirstName + " " + other.LastName).Trim(),
                     Avatar = other.ProfilePicturePath,
-                    Sub = "Online status (optional)"  // agar tracking ho
+                    Sub = "Online status (optional)"
                 });
             }
             else

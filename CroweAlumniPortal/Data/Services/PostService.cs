@@ -206,6 +206,29 @@ namespace CroweAlumniPortal.Data.Services
         {
             return await dc.Posts.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
         }
+        public async Task SoftDeleteAsync(int id, string deletedBy)
+        {
+            var p = await dc.Posts.FindAsync(id);
+            if (p == null) throw new KeyNotFoundException("Post not found");
+            if (p.IsDeleted) return;
 
+            p.IsDeleted = true;
+            p.DeletedOn = DateTime.UtcNow;
+            p.DeletedBy = deletedBy;
+            p.IsActive = false;
+            await dc.SaveChangesAsync();
+        }
+
+        public async Task RestoreAsync(long id)
+        {
+            var p = await dc.Posts.FindAsync(id);
+            if (p == null) throw new KeyNotFoundException("Post not found");
+            if (!p.IsDeleted) return;
+
+            p.IsDeleted = false;
+            p.DeletedOn = null;
+            p.DeletedBy = null;
+            await dc.SaveChangesAsync();
+        }
     }
 }

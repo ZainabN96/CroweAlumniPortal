@@ -1,5 +1,8 @@
-﻿function initialsFromName(name) {
-  const parts = (name || "").trim().split(/\s+/).filter(Boolean);
+﻿const userTy = sessionStorage.getItem("userType");
+const currentUserIsAdmin = (userTy?.toLowerCase() === "admin");
+
+function initialsFromName(name) {
+    const parts = (name || "").trim().split(/\s+/).filter(Boolean);
     if (parts.length === 0) return "";
     if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
     return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
@@ -7,7 +10,7 @@
 
 function timeAgo(iso) {
     // Force treat timestamp as UTC
-    const then = new Date(iso + "Z"); // 👈 add Z = UTC marker if missing
+    const then = new Date(iso + "Z");
     const now = new Date();
 
     // Difference in seconds
@@ -29,14 +32,14 @@ function timeAgo(iso) {
 
 // media preview builder
 function mediaBlock(p) {
-  if (!p.mediaPath) return "";
+    if (!p.mediaPath) return "";
     const t = (p.mediaType || "").toLowerCase();
     if (t === "image") {
-    return `<img src="${p.mediaPath}" class="img-fluid mt-2 rounded" alt="attachment">`;
-  } else if (t === "video") {
-    return `<video src="${p.mediaPath}" class="w-100 mt-2 rounded" controls></video>`;
-  }
-        return `<p class="mt-2"><a href="${p.mediaPath}" target="_blank">Attachment</a></p>`;
+        return `<img src="${p.mediaPath}" class="img-fluid mt-2 rounded" alt="attachment">`;
+    } else if (t === "video") {
+        return `<video src="${p.mediaPath}" class="w-100 mt-2 rounded" controls></video>`;
+    }
+    return `<p class="mt-2"><a href="${p.mediaPath}" target="_blank">Attachment</a></p>`;
 }
 
 function renderComment(c) {
@@ -61,7 +64,7 @@ function renderComment(c) {
     </div>`;
 }
 
-function renderFbPostCard(p) {
+function renderFbPostCard(p, currentUserIsAdmin) {
     const name = `${p.author?.firstName ?? ""} ${p.author?.lastName ?? ""}`.trim() || "Unknown";
     const time = p.createdOn ? timeAgo(p.createdOn) : "";
     const hasPic = !!p.author?.profilePicturePath;
@@ -73,6 +76,20 @@ function renderFbPostCard(p) {
     const safeBody = (p.body || "").replace(/\n/g, "<br />");
     const likedCls = p.isLiked ? "active" : "";
 
+    const adminControls = currentUserIsAdmin ? `
+      <div class="ms-auto dropdown">
+        <a class="" data-bs-toggle="dropdown" aria-expanded="false" title="More">
+          <i class="bi bi-three-dots-vertical"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <a class="dropdown-item btn-soft-delete" href="#" data-id="${p.id}">
+              Delete
+            </a>
+          </li>
+        </ul>
+      </div>` : '';
+
     return `
     <div class="card shadow-sm mb-3 crw-event-card" data-id="${p.id}" id="post-${p.id}">
       <div class="card-body">
@@ -82,7 +99,7 @@ function renderFbPostCard(p) {
             <div class="fw-semibold">${name}</div>
             <div class="text-muted small">${time}</div>
           </div>
-          <div class="ms-auto text-muted"><i class="bi bi-three-dots-vertical"></i></div>
+          ${adminControls}
         </div>
 
         ${p.title ? `<h6 class="mb-1">${p.title}</h6>` : ""}
@@ -103,12 +120,35 @@ function renderFbPostCard(p) {
           <button class="btn btn-sm btn-primary btn-submit-comment">Post</button>
         </div>
         <div class="comments mt-2"></div>
-      </div>
+        <div class="mt-2 text-center border rounded">
+            <a class="d-inline-block mt-2 mb-2" href="/Posts/Details/${p.id}">
+                View More
+            </a>
+        </div>
+        </div>
     </div>`;
 }
 
+$(document).on("click", ".btn-soft-delete", function (e) {
+    e.preventDefault();
+    const $btn = $(this);
+    const postId = $btn.data("id");
+    if (!postId) return;
+    if (!confirm("Are you sure you want to remove this post? This hides it from everyone.")) return;
+
+    $.post(`/api/posts/${postId}/soft-delete`)
+        .done(res => {
+            // remove card from UI or mark as deleted
+            $(`#post-${postId}`).fadeOut(300, function () { $(this).remove(); });
+            // optionally show notification
+            swal("Removed", "The post has been removed.", "success");
+        })
+        .fail(xhr => {
+            swal("Failed", xhr.responseText || "Could not delete post.", "error");
+        });
+});
 function hydratePostCard($card, postId) {
-   // debugger;
+    // debugger;
     const $comments = $card.find(".comments");
     $comments.html(`<div class="text-muted small">Loading comments…</div>`);
     $.get(`/api/posts/${postId}/comments`)
@@ -124,7 +164,6 @@ function hydratePostCard($card, postId) {
             $comments.html(`<div class="text-danger small">Failed to load comments.</div>`);
         });
 }
-
 
 (function () {
     let selectedFile = null;
@@ -173,7 +212,7 @@ function hydratePostCard($card, postId) {
             contentType: false
         })
             .done(function (res) {
-                $("#postContainer").prepend(renderFbPostCard(res));
+                $("#postContainer").prepend(renderFbPostCard(res, currentUserIsAdmin));
                 // reset composer
                 swal("Process Completed!", "The Post has been Added!", "success")
                 $("#postTitle").val(""); $("#postText").val("");
@@ -187,39 +226,37 @@ function hydratePostCard($card, postId) {
     getPost();
 
     function getPost() {
-        //debugger;
         $.get("/api/posts/latest", { take: 10 })
-        .done(list => {
-            // debugger;
-            if (Array.isArray(list) && list.length) {
-                const html = list.map(renderFbPostCard).join("");
-                $("#postContainer").html(html);
+            .done(list => {
+                if (Array.isArray(list) && list.length) {
+                    const html = list.map(p => renderFbPostCard(p, currentUserIsAdmin)).join("");
+                    $("#postContainer").html(html);
 
-                $("#postContainer .crw-event-card").each(function () {
-                    const postId = $(this).data("id");
-                    hydratePostCard($(this), postId);
-                });
-            }
-        });
+                    $("#postContainer .crw-event-card").each(function () {
+                        const postId = $(this).data("id");
+                        hydratePostCard($(this), postId);
+                    });
+                }
+            });
     }
     // Like click
-   $(document).on("click", ".btn-like", function () {
+    $(document).on("click", ".btn-like", function () {
         const card = $(this).closest(".crw-event-card");
         const postId = card.data("id");
-       $.post(`/api/posts/${postId}/like/toggle`)
-           .done(data => {
-               debugger;
-               getPost();
+        $.post(`/api/posts/${postId}/like/toggle`)
+            .done(data => {
+                debugger;
+                getPost();
             });
-   });
+    });
     $(document).on("click", ".btn-unlike", function () {
         const card = $(this).closest(".crw-event-card");
         const postId = card.data("id");
         $.post(`/api/posts/${postId}/unlike`)
-        .done(() => {
-            let cnt = parseInt(card.find(".like-count").text()) || 0;
-            card.find(".like-count").text(`${cnt} likes`);
-        });
+            .done(() => {
+                let cnt = parseInt(card.find(".like-count").text()) || 0;
+                card.find(".like-count").text(`${cnt} likes`);
+            });
     });
 
     // Submit comment
@@ -236,16 +273,13 @@ function hydratePostCard($card, postId) {
             contentType: "application/json",
             data: JSON.stringify({ body: text })
         })
-        .done(res => {
-            $card.find(".comments").append(renderComment(res));
-            $input.val("");
+            .done(res => {
+                $card.find(".comments").append(renderComment(res));
+                $input.val("");
 
-        })
-        .fail(xhr => {
-            alert(xhr.responseText || "Failed to add comment.");
-        });
+            })
+            .fail(xhr => {
+                alert(xhr.responseText || "Failed to add comment.");
+            });
     });
 })();
-
-
-

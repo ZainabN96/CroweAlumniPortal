@@ -14,6 +14,9 @@ namespace CroweAlumniPortal.Models
         public string? MediaPath { get; set; } 
         [StringLength(50)]
         public string? MediaType { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedOn { get; set; }
+        public string? DeletedBy { get; set; }
     }
     public class PostLike : AuditableEntity
     {

@@ -2,6 +2,7 @@
 using CroweAlumniPortal.Data.IServices;
 using CroweAlumniPortal.Data.Services;
 using CroweAlumniPortal.Dtos;
+using CroweAlumniPortal.Helper;
 using CroweAlumniPortal.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,13 +16,15 @@ namespace CroweAlumniPortal.Controllers.api
         private readonly IFileService files;
         private readonly IMapper mapper;
         private readonly INotificationService notificationService;
+        private readonly IMailService mailService;
 
-        public PostsController(IUnitOfWork uow, IFileService files, IMapper mapper, INotificationService notificationService)
+        public PostsController(IUnitOfWork uow, IFileService files, IMapper mapper, INotificationService notificationService, IMailService mailService)
         {
             this.uow = uow;
             this.files = files;
             this.mapper = mapper;
             this.notificationService = notificationService;
+            this.mailService = mailService;
         }
 
         [HttpPost]
@@ -30,11 +33,13 @@ namespace CroweAlumniPortal.Controllers.api
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
+            // current user id from session
             int? userId = null;
             var userIdStr = HttpContext.Session.GetString("UserId");
             if (!string.IsNullOrWhiteSpace(userIdStr) && int.TryParse(userIdStr, out var parsed))
                 userId = parsed;
 
+            // media
             if (dto.Media is { Length: > 0 })
             {
                 if (dto.Media.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
@@ -49,17 +54,19 @@ namespace CroweAlumniPortal.Controllers.api
 
             var created = await uow.PostService.CreateAsync(dto, userId);
 
+            // author fetch (may be null if not logged-in)
             var author = userId.HasValue ? await uow.UserService.Get(userId.Value) : null;
             var authorName = (author == null)
                 ? "Someone"
                 : $"{author.FirstName ?? ""} {author.LastName ?? ""}".Trim();
 
+            // 🔔 Send live notification to all (except author)
             await notificationService.CreateForAllAsync(new Notification
             {
                 Type = "post",
                 Title = "New Post Added",
                 Message = $"{authorName} added a new post: {dto.Title ?? "Untitled"}",
-                Url = "/Dashboard/Index"
+                Url = $"/Posts/Details/{created.Id}"
             }, exceptUserId: userId);
 
             return Ok(new
@@ -78,7 +85,7 @@ namespace CroweAlumniPortal.Controllers.api
                 }
             });
         }
-        
+
         [HttpGet("latest")]
         public async Task<IActionResult> Latest([FromQuery] int take = 10)
         {
@@ -190,7 +197,7 @@ namespace CroweAlumniPortal.Controllers.api
                         Type = "like",
                         Title = "New like on your post",
                         Message = $"{likerName} liked {postTitle}.",
-                        Url = $"/Dashboard/Dashboard#post-{id}"
+                        Url = $"/Posts/Details/{id}"
                     }, ownerId.Value);
                 }
             }
@@ -272,6 +279,97 @@ namespace CroweAlumniPortal.Controllers.api
             }
 
             return Ok(result);
+        }
+
+        [HttpPost("{id:int}/soft-delete")]
+        public async Task<IActionResult> SoftDelete(int id)
+        {
+            try
+            {
+                string adminName = "Admin";
+                int? adminId = null;
+
+                var userIdStr = HttpContext.Session.GetString("UserId");
+                if (!string.IsNullOrWhiteSpace(userIdStr) && int.TryParse(userIdStr, out var parsedId))
+                {
+                    adminId = parsedId;
+                    var adminUser = await uow.UserService.Get(parsedId);
+                    if (adminUser != null)
+                        adminName = $"{adminUser.FirstName} {adminUser.LastName}".Trim();
+                }
+
+                var post = await uow.PostService.GetByIdAsync(id);
+                if (post == null) return NotFound();
+
+                var author = await uow.UserService.Get((int)post.CreatedBy);
+                if (author == null) return NotFound();
+
+                await uow.PostService.SoftDeleteAsync(id, adminName);
+                await uow.SaveAsync();
+
+                try
+                {
+                    await notificationService.NotifyPostSoftDeletedAsync(author, post, adminId ?? 0, adminName);
+                }
+                catch
+                {
+                    // log later
+                }
+
+                try
+                {
+                    var subject = $"Your post was removed by {adminName}";
+                    var body = EmailTemplates.PostSoftDeletedBody(
+                        author.FirstName,
+                        post.Title,
+                        adminName,
+                        post.Id);
+
+                    await mailService.SendEmailAsync(new MailRequestDto
+                    {
+                        ToEmail = author.EmailAddress,
+                        Subject = subject,
+                        Body = body
+                    });
+                }
+                catch
+                {
+                    // log later
+                }
+
+                return Ok(new { message = "Post deleted." });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+
+        [HttpPost("{id:long}/restore")]
+        public async Task<IActionResult> Restore(long id)
+        {
+            try
+            {
+                await uow.PostService.RestoreAsync(id);
+                return Ok(new { message = "Post restored." });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpGet("{id:int}/like/state")]
+        public async Task<IActionResult> LikeState(int id)
+        {
+            int? uid = null;
+            var s = HttpContext.Session.GetString("UserId");
+            if (!string.IsNullOrWhiteSpace(s) && int.TryParse(s, out var parsed)) uid = parsed;
+
+            var likeCount = await uow.PostService.GetLikeCountAsync(id);
+            var isLiked = uid.HasValue && await uow.PostService.HasUserLikedAsync(id, uid.Value);
+            return Ok(new { likeCount, isLiked });
         }
     }
 }

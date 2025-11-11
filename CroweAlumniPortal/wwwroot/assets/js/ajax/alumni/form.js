@@ -1,19 +1,4 @@
-﻿$(function () {
-    const $bg = $("#BG");
-    const $box = $("#bloodAddBox");
-    const $input = $("#customBlood");
-
-    $bg.on("change", function () {
-        if (($bg.val() || "").toLowerCase() === "other") {
-            $box.slideDown();
-            $input.focus();
-        } else {
-            $box.slideUp();
-            $input.val("");
-        }
-    });
-});
-
+﻿
 // ---------------- Member Status (All Common Professional Bodies) ----------------
 const memberList = [
     // Accounting & Audit
@@ -108,12 +93,6 @@ function bindMemberCustomAdd() {
         $err.hide().text("");
     });
 }
-
-// ---- Init (call these where others are initialized)
-$(function () {
-    populateMembers();
-    bindMemberCustomAdd();
-});
 
 // ---------------- Qualification (All Degrees) ----------------
 const degreeCatalog = {
@@ -218,11 +197,7 @@ function bindQualificationCustomAdd() {
     });
 }
 
-// ---- Init (call these with the rest of your inits)
-$(function () {
-    populateQualifications();
-    bindQualificationCustomAdd();
-});
+
 function bindProfilePicPreview() {
     const $input = $("#profilepic");
     const $label = $("#profile-pic");
@@ -275,11 +250,6 @@ function bindProfilePicPreview() {
     });
 }
 
-// ---- call this in init:
-$(function () {
-    // ...aapki baaqi init calls
-    bindProfilePicPreview();
-});
 
 // ---------- Countries & Cities via CountriesNow ----------
 const CN_BASE = "https://countriesnow.space/api/v0.1/countries";
@@ -373,8 +343,8 @@ function initIndustries() {
 
 // ---------- Organizations + Add (robust) ----------
 const organizations = [
-    "Crowe Pakistan", "Crowe Middle East", "Crowe Technology Foundation", "The FinCore Group", "Mesh Mavens", "Kapray Vaghera",
-    "Inoxium Tubi Pipes Industry", "Crowe Consulting", "Systems", "NetSol", "Vu360Solutions", "MEP Solutions", "Startex Marketing",
+    "Crowe Pakistan", "HCC Middle East", "HCC Technology Foundation", "The FinCore Group", "Mesh Mavens", "Kapray Vaghera",
+    "Inoxium Tubi Pipes Industry", "HCC Consulting", "Systems", "NetSol", "Vu360Solutions", "MEP Solutions", "Startex Marketing",
     "Deloitte", "PwC (PricewaterhouseCoopers)", "EY (Ernst & Young)", "KPMG", "Grant Thornton", "BDO International", "Mazars",
     "RSM Global", "Baker Tilly", "Moore Global", "Nexia International", "Crowe Global",
     // Tech
@@ -456,8 +426,148 @@ function initOrgBox() {
     $(document).off(".orgBoxClose").on("click.orgBoxClose", () => { if ($box.hasClass("show")) hideBox(); });
     $(document).off(".orgEsc").on("keydown.orgEsc", e => { if (e.key === "Escape") hideBox(); });
 }
+// ---------- Generic Field Error Helpers ----------
+function clearAllFieldErrors() {
+    $(".field-error").remove();
+    $(".is-invalid").removeClass("is-invalid");
+}
 
-// ---------- Misc UI helpers ----------
+function showFieldError(selector, message) {
+    const $field = $(selector);
+    if (!$field.length) return;
+
+    const $group = $field.closest(".form-group, .privacy-check");
+    let $err = $group.find(".field-error");
+
+    if (!$err.length) {
+        $err = $('<div class="field-error text-danger small mt-1"></div>');
+        $group.append($err);
+    }
+
+    $field.addClass("is-invalid");
+    $err.text(message).show();
+}
+
+// ---------- Actual Validation ----------
+function validateRegistrationForm() {
+    clearAllFieldErrors();
+    let isValid = true;
+
+    // Helper to check required text/select
+    const requireField = (selector, message) => {
+        if (!v(selector)) {
+            showFieldError(selector, message);
+            isValid = false;
+        }
+    };
+
+    // ===== PROFILE=====
+    requireField("#title", "Title is required.");
+    requireField("#fullName", "First Name is required.");
+    requireField("#lastname", "Last Name is required.");
+    requireField("#dob", "Date of Birth is required.");
+
+    // DOB should not be in future
+    if (v("#dob")) {
+        const dob = new Date(v("#dob"));
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (dob > today) {
+            showFieldError("#dob", "Date of Birth cannot be in the future.");
+            isValid = false;
+        }
+    }
+
+    // MemberStatus, Qualification (Required in model)
+    requireField("#memberStatus", "Member status is required.");
+    requireField("#qualification", "Qualification is required.");
+
+    // CNIC (Required + 13 digits without dashes)
+    if (!v("#cnic")) {
+        showFieldError("#cnic", "CNIC is required.");
+        isValid = false;
+    } else if (!/^\d{13}$/.test(v("#cnic"))) {
+        showFieldError("#cnic", "CNIC must be 13 digits without dashes.");
+        isValid = false;
+    }
+
+    // ===== HOME ADDRESS (C# [Required]) =====
+    requireField("#address", "Home address is required.");
+    requireField("#homeCountry", "Home country is required.");
+    requireField("#homeCity", "Home city is required.");
+
+    // Mobile optional in DB, lekin usually form level pe chahiye:
+    if (!v("#mobileNumber")) {
+        showFieldError("#mobileNumber", "Mobile number is required.");
+        isValid = false;
+    }
+
+    // EmailAddress [Required]
+    if (!v("#emaiaddress")) {
+        showFieldError("#emaiaddress", "Email address is required.");
+        isValid = false;
+    } else {
+        const email = v("#emaiaddress");
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showFieldError("#emaiaddress", "Please enter a valid email address.");
+            isValid = false;
+        }
+    }
+
+    // ===== EMPLOYMENT & LOGIN (C# [Required]) =====
+    // EmploymentStatus
+    requireField("#empStatus", "Employment status is required.");
+
+    // Passwords (Password [Required] in model)
+    if (!v("#password") || !v("#cnfrmpassword")) {
+        showFieldError("#password", "Password and Confirm Password are required.");
+        showFieldError("#cnfrmpassword", "Password and Confirm Password are required.");
+        isValid = false;
+    } else if (v("#password") !== v("#cnfrmpassword")) {
+        showFieldError("#cnfrmpassword", "Passwords do not match.");
+        isValid = false;
+    }
+
+    // ===== CURRENT EMPLOYER (Required in model) =====
+    requireField("#industry", "Current industry is required.");
+    requireField("#ORG", "Current organization is required.");
+    requireField("#EmployerAddress", "Employer address is required.");
+
+    // EmployerCountry / EmployerCity optional in model but recommended:
+    if (!v("#empCountry")) {
+        showFieldError("#empCountry", "Employer country is required.");
+        isValid = false;
+    }
+    if (!v("#empCity")) {
+        showFieldError("#empCity", "Employer city is required.");
+        isValid = false;
+    }
+
+    // ===== CROWE HISTORY (Required in model) =====
+    requireField("#lastposition", "Last position held is required.");
+    requireField("#department", "Department is required.");
+    requireField("#historycity", "Crowe city/location is required.");
+    requireField("#leavingdate", "Leaving date is required.");
+
+    // LeavingDate >= JoiningDate (if JoiningDate given)
+    if (v("#Joiningdate") && v("#leavingdate")) {
+        const join = new Date(v("#Joiningdate"));
+        const leave = new Date(v("#leavingdate"));
+        if (leave < join) {
+            showFieldError("#leavingdate", "Leaving date cannot be before joining date.");
+            isValid = false;
+        }
+    }
+
+    // ===== Privacy Consent (AgreePrivacy [Required]) =====
+    if (!$("#agreePrivacy").is(":checked")) {
+        showFieldError("#agreePrivacy", "You must agree to the privacy statement.");
+        isValid = false;
+    }
+
+    return isValid;
+}
 function bindProfilePicLabel() {
     $("#profilepic").on("change", function () {
         const fileName = this.files && this.files.length ? this.files[0].name : "Add Picture";
@@ -465,7 +575,6 @@ function bindProfilePicLabel() {
     });
 }
 
-// ---------- Form submit ----------
 const v = sel => ($(sel).val() || '').trim();
 const toIsoDate = sel => $(sel).val() || null;
 
@@ -473,21 +582,17 @@ function bindFormSubmit() {
     $("#contactForm").off("submit.reg").on("submit.reg", function (e) {
         e.preventDefault();
 
-        if (!v("#password") || !v("#cnfrmpassword")) {
-            swal("Required", "Password aur Confirm Password zaroor bharain.", "warning"); return;
-        }
-        if (v("#password") !== v("#cnfrmpassword")) {
-            swal("Mismatch", "Passwords do not match.", "error"); return;
-        }
-        if (!$("#agreePrivacy").is(":checked")) {
-            swal("Consent", "Please agree to the privacy statement.", "info"); return;
+        // 💡 First: client-side validation according to DB/model
+        if (!validateRegistrationForm()) {
+            swal("Validation Failed", "Please correct the highlighted fields.", "error");
+            return;
         }
 
         const fd = new FormData();
         const file = $("#profilepic")[0]?.files?.[0] || null;
         if (file) fd.append("ProfilePhoto", file);
 
-        // payload
+        // payload (UserType & OrganizationType backend se fixed)
         fd.append("UserType", "Alumni");
         fd.append("OrganizationType", "Crowe");
 
@@ -497,9 +602,19 @@ function bindFormSubmit() {
         fd.append("DOB", toIsoDate("#dob"));
         fd.append("MemberStatus", v("#memberStatus"));
         fd.append("Qualification", v("#qualification"));
-        fd.append("BloodGroup", v("#BG"));
+
+        // BloodGroup optional + custom "Other"
+        const bg = v("#BG");
+        const customBg = v("#customBlood");
+        if (bg.toLowerCase() === "other" && customBg) {
+            fd.append("BloodGroup", customBg);
+        } else {
+            fd.append("BloodGroup", bg);
+        }
+
         fd.append("CNIC", v("#cnic"));
 
+        // Home address
         fd.append("Address", v("#address"));
         fd.append("ZIP", v("#ZIP"));
         fd.append("Country", v("#homeCountry"));
@@ -508,24 +623,32 @@ function bindFormSubmit() {
         fd.append("EmailAddress", v("#emaiaddress"));
         fd.append("LandLine1", v("#landLine1"));
         fd.append("LandLine2", v("#landLine2"));
-        fd.append("FaxNumber", v("#faxNumber"));
+
+        // 🔧 yahan bug tha: #faxNumber id exist nahi karti
+        // personal fax:
+        fd.append("FaxNumber", v("#personalfaxNumber"));
         fd.append("LinkedIn", v("#LinkedIn"));
 
+        // Employment & login
         fd.append("EmploymentStatus", v("#empStatus"));
         fd.append("Password", v("#password"));
         fd.append("ConfirmPassword", v("#cnfrmpassword"));
         fd.append("Question", v("#question"));
         fd.append("SecretAnswer", v("#answer"));
 
+        // Current employer
         fd.append("Industry", v("#industry"));
         fd.append("EmployerOrganization", v("#ORG"));
         fd.append("JobTitle", v("#JobTitle"));
         fd.append("EmployerCountry", v("#empCountry"));
         fd.append("EmployerCity", v("#empCity"));
-        fd.append("EmployerLandline1", v("#landLine1")); // if you separate employer landline, change ID here
-        fd.append("EmployerFaxNumber", v("#faxNumber")); // same note
+        // Employer landline – abhi tum home landline hi bhej rahi ho, same rehne diya:
+        fd.append("EmployerLandline1", v("#landLine1"));
+        // official fax
+        fd.append("EmployerFaxNumber", v("#officialfaxNumber"));
         fd.append("EmployerAddress", v("#EmployerAddress"));
 
+        // Crowe history
         fd.append("StaffCode", v("#staffcode"));
         fd.append("LastPosition", v("#lastposition"));
         fd.append("Department", v("#department"));
@@ -543,21 +666,141 @@ function bindFormSubmit() {
             success: function (res) {
                 swal("Success", "Registration successful!", "success");
                 $("#contactForm")[0].reset();
-                if (res?.profilePicturePath) $(".new-profile-photo").attr("src", res.profilePicturePath);
+                if (res?.profilePicturePath) {
+                    $(".new-profile-photo").attr("src", res.profilePicturePath);
+                }
                 $("#profile-pic").text("Add Picture");
+                clearAllFieldErrors();
             },
             error: function (xhr) {
                 let msg = xhr.responseText || "Something went wrong.";
-                try { msg = JSON.parse(msg).errorMessage || msg; } catch { }
+                try {
+                    msg = JSON.parse(msg).errorMessage || msg;
+                } catch { }
                 swal("Failed", msg, "error");
             }
         });
     });
 }
 
-// ---------- Init ----------
 $(function () {
-    // sanity check for required IDs
+    const $bg = $("#BG");
+    const $box = $("#bloodAddBox");
+    const $input = $("#customBlood");
+
+    $bg.on("change", function () {
+        if (($bg.val() || "").toLowerCase() === "other") {
+            $box.slideDown();
+            $input.focus();
+        } else {
+            $box.slideUp();
+            $input.val("");
+        }
+    });
+    const required = ["homeCountry", "homeCity", "empCountry", "empCity", "industry", "ORG", "orgAddTrigger", "orgAddBox", "newORGInput", "addOrgBtn", "errorPopup"];
+    const missing = required.filter(id => !document.getElementById(id));
+    if (missing.length) console.warn("Missing IDs:", missing.join(", "));
+
+    loadAllCountriesAndCities();
+    initIndustries();
+    initOrgBox();
+    bindProfilePicLabel();
+    bindProfilePicPreview();
+    populateMembers();
+    bindMemberCustomAdd();
+    populateQualifications();
+    bindQualificationCustomAdd();
+    bindFormSubmit();
+});
+
+
+/*//function bindFormSubmit() {
+//    $("#contactForm").off("submit.reg").on("submit.reg", function (e) {
+//        e.preventDefault();
+
+//        if (!v("#password") || !v("#cnfrmpassword")) {
+//            swal("Required", "Password and Confirm Password is missing.", "warning"); return;
+//        }
+//        if (v("#password") !== v("#cnfrmpassword")) {
+//            swal("Mismatch", "Passwords do not match.", "error"); return;
+//        }
+//        if (!$("#agreePrivacy").is(":checked")) {
+//            swal("Consent", "Please agree to the privacy statement.", "info"); return;
+//        }
+
+//        const fd = new FormData();
+//        const file = $("#profilepic")[0]?.files?.[0] || null;
+//        if (file) fd.append("ProfilePhoto", file);
+
+//        // payload
+//        fd.append("UserType", "Alumni");
+//        fd.append("OrganizationType", "Crowe");
+
+//        fd.append("Title", v("#title"));
+//        fd.append("FirstName", v("#fullName"));
+//        fd.append("LastName", v("#lastname"));
+//        fd.append("DOB", toIsoDate("#dob"));
+//        fd.append("MemberStatus", v("#memberStatus"));
+//        fd.append("Qualification", v("#qualification"));
+//        fd.append("BloodGroup", v("#BG"));
+//        fd.append("CNIC", v("#cnic"));
+
+//        fd.append("Address", v("#address"));
+//        fd.append("ZIP", v("#ZIP"));
+//        fd.append("Country", v("#homeCountry"));
+//        fd.append("City", v("#homeCity"));
+//        fd.append("MobileNumber", v("#mobileNumber"));
+//        fd.append("EmailAddress", v("#emaiaddress"));
+//        fd.append("LandLine1", v("#landLine1"));
+//        fd.append("LandLine2", v("#landLine2"));
+//        fd.append("FaxNumber", v("#faxNumber"));
+//        fd.append("LinkedIn", v("#LinkedIn"));
+
+//        fd.append("EmploymentStatus", v("#empStatus"));
+//        fd.append("Password", v("#password"));
+//        fd.append("ConfirmPassword", v("#cnfrmpassword"));
+//        fd.append("Question", v("#question"));
+//        fd.append("SecretAnswer", v("#answer"));
+
+//        fd.append("Industry", v("#industry"));
+//        fd.append("EmployerOrganization", v("#ORG"));
+//        fd.append("JobTitle", v("#JobTitle"));
+//        fd.append("EmployerCountry", v("#empCountry"));
+//        fd.append("EmployerCity", v("#empCity"));
+//        fd.append("EmployerLandline1", v("#landLine1"));
+//        fd.append("EmployerFaxNumber", v("#officialfaxNumber"));
+//        fd.append("EmployerAddress", v("#EmployerAddress"));
+
+//        fd.append("StaffCode", v("#staffcode"));
+//        fd.append("LastPosition", v("#lastposition"));
+//        fd.append("Department", v("#department"));
+//        fd.append("HistoryCity", v("#historycity"));
+//        fd.append("JoiningDate", toIsoDate("#Joiningdate") || "");
+//        fd.append("LeavingDate", toIsoDate("#leavingdate") || "");
+//        fd.append("AgreePrivacy", $("#agreePrivacy").is(":checked"));
+
+//        $.ajax({
+//            url: "/api/user/register",
+//            type: "POST",
+//            data: fd,
+//            processData: false,
+//            contentType: false,
+//            success: function (res) {
+//                swal("Success", "Registration successful!", "success");
+//                $("#contactForm")[0].reset();
+//                if (res?.profilePicturePath) $(".new-profile-photo").attr("src", res.profilePicturePath);
+//                $("#profile-pic").text("Add Picture");
+//            },
+//            error: function (xhr) {
+//                let msg = xhr.responseText || "Something went wrong.";
+//                try { msg = JSON.parse(msg).errorMessage || msg; } catch { }
+//                swal("Failed", msg, "error");
+//            }
+//        });
+//    })
+//}*/
+
+/*$(function () {
     const required = ["homeCountry", "homeCity", "empCountry", "empCity", "industry", "ORG", "orgAddTrigger", "orgAddBox", "newORGInput", "addOrgBtn", "errorPopup"];
     const missing = required.filter(id => !document.getElementById(id));
     if (missing.length) console.warn("Missing IDs:", missing.join(", "));
@@ -567,4 +810,4 @@ $(function () {
     initOrgBox();
     bindProfilePicLabel();
     bindFormSubmit();
-});
+});*/

@@ -17,7 +17,7 @@ namespace CroweAlumniPortal.Data.Services
             };
 
             var message = new MimeMessage();
-            string fromAddress = "test@hcctechfoundation.com";
+            string fromAddress = "Crowe@hcctechfoundation.com";
             string fromName = "Crowe Alumni Admin";
 
             message.From.Add(new MailboxAddress(fromName, fromAddress));
@@ -31,7 +31,7 @@ namespace CroweAlumniPortal.Data.Services
 
                 await client.ConnectAsync("mail.hcctechfoundation.com", 587, SecureSocketOptions.StartTls);
 
-                await client.AuthenticateAsync(fromAddress, "TesT@PRt1.*");
+                await client.AuthenticateAsync(fromAddress, "HccTech*1_2121");
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
             }

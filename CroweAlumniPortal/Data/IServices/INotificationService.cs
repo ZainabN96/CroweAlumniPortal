@@ -14,5 +14,6 @@ namespace CroweAlumniPortal.Data.IServices
         Task NotifyAdminsNewUserAsync(User user);
         Task NotifyUserApprovedAsync(User user);
         Task NotifyUserRejectedAsync(User user, string reason);
+        Task NotifyPostSoftDeletedAsync(User author, Post post, int admin, string adminName);
     }
 }

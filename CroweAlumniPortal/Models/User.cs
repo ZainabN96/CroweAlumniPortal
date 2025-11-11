@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using CroweAlumniPortal;
 
 namespace CroweAlumniPortal.Models
 {
     public class User : BaseEntity
-    {   
+    {
+        // Profile
         [Required]
         public string Title { get; set; }
 
@@ -22,12 +24,12 @@ namespace CroweAlumniPortal.Models
         public string CNIC { get; set; }
 
         [Required]
-        public string MemberStatus { get; set; }
+        public string? MemberStatus { get; set; }
 
         [Required]
         public string Qualification { get; set; }
 
-        public string BloodGroup { get; set; }
+        public string? BloodGroup { get; set; }
 
         // Home Address
         [Required]
@@ -44,19 +46,19 @@ namespace CroweAlumniPortal.Models
         [Required]
         public string EmailAddress { get; set; }
 
-        public string LandLine1 { get; set; }
+        public string? LandLine1 { get; set; }
 
-        public string LandLine2 { get; set; }
+        public string? LandLine2 { get; set; }
 
-        public string FaxNumber { get; set; }
+        public string? FaxNumber { get; set; }
 
-        public string LinkedIn { get; set; }
-        
+        public string? LinkedIn { get; set; }
+
         // User Type & Organization
         [Required]
         public string UserType { get; set; } // "Admin" or "Alumni"
 
-        public string OrganizationType { get; set; } // Crowe, Crowe, HTF
+        public string OrganizationType { get; set; } // Crowe, HCC, HTF
 
         // Login Details
         [Required]
@@ -74,23 +76,23 @@ namespace CroweAlumniPortal.Models
 
         // Current Employer
         [Required]
-        public string Industry { get; set; }
+        public string? Industry { get; set; }
 
         [Required]
-        public string EmployerOrganization { get; set; }
+        public string? EmployerOrganization { get; set; }
 
         public string JobTitle { get; set; }
 
-        public string EmployerCountry { get; set; }
+        public string? EmployerCountry { get; set; }
 
-        public string EmployerCity { get; set; }
+        public string? EmployerCity { get; set; }
 
-        public string EmployerLandline1 { get; set; }
+        public string? EmployerLandline1 { get; set; }
 
-        public string EmployerFaxNumber { get; set; }
+        public string? EmployerFaxNumber { get; set; }
 
         [Required]
-        public string EmployerAddress { get; set; }
+        public string? EmployerAddress { get; set; }
 
         // Crowe History
         public string StaffCode { get; set; }
@@ -114,7 +116,7 @@ namespace CroweAlumniPortal.Models
         public UserApprovalStatus ApprovalStatus { get; set; } = UserApprovalStatus.Pending;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? ApprovedAt { get; set; }
-        public string? ApprovedBy { get; set; } 
+        public string? ApprovedBy { get; set; }
         public string? RejectionReason { get; set; }
 
     }

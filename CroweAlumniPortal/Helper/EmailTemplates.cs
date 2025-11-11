@@ -43,5 +43,17 @@ namespace CroweAlumniPortal.Helper
             Regards,<BR>
             Crowe Alumni Team
         ";
+
+        public static string PostSoftDeletedBody(string firstName, string postTitle, string adminName, long postId) => $@"
+            <div style='font-family:Segoe UI,Arial,sans-serif;font-size:14px;color:#222'>
+              <p>Hi {System.Net.WebUtility.HtmlEncode(firstName)},</p>
+              <p>Your post <strong>{System.Net.WebUtility.HtmlEncode(postTitle ?? "Untitled")}</strong> (ID: {postId})
+                 has been <strong>removed by {System.Net.WebUtility.HtmlEncode(adminName)}</strong> for violating our community guidelines
+                 or at the admin’s discretion.</p>
+              <p>If you believe this was a mistake, you can reply to this email to request a review.</p>
+              <hr style='border:none;border-top:1px solid #eee;margin:16px 0' />
+              <p style='color:#666'>This is a system notification from the Alumni Portal.</p>
+            </div>
+        ";
     }
 }

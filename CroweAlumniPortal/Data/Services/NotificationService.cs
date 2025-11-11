@@ -143,6 +143,45 @@ namespace CroweAlumniPortal.Data.Services
             emailSender.SendAsync(user.EmailAddress,
                 Helper.EmailTemplates.RejectedSubject,
                 Helper.EmailTemplates.RejectedBody(user.FirstName, user.LastName, reason));
+
+        public async Task NotifyPostSoftDeletedAsync(User author, Post post, int admin, string adminName)
+        {
+            var notification = new Notification
+            {
+                Type = "post-deleted",
+                Title = "Your post was removed by admin",
+                Message = $"Your post \"{post?.Title ?? "Untitled"}\" has been removed by {adminName}.",
+                Url = $"/Posts/Details/{post?.Id}",
+                IsGlobal = false,
+                CreatedBy = admin,
+                CreatedOn = DateTime.UtcNow
+            };
+
+            // 2️⃣ Add notification record
+            dc.Notifications.Add(notification);
+            await dc.SaveChangesAsync();
+
+            // 3️⃣ Create user mapping
+            var userNotification = new NotificationUser
+            {
+                NotificationId = notification.Id,
+                UserId = author.Id,
+                IsRead = false
+            };
+
+            dc.NotificationUsers.Add(userNotification);
+            await dc.SaveChangesAsync();
+
+            // 4️⃣ Optional real-time push (SignalR)
+            await hub.Clients.Group($"user-{author.Id}").SendAsync("PostSoftDeleted", new
+            {
+                title = notification.Title,
+                message = notification.Message,
+                postId = post?.Id,
+                admin = adminName,
+                createdOn = notification.CreatedOn
+            });
+        }
     }
 
 }
