@@ -1,6 +1,38 @@
 ﻿const userTy = sessionStorage.getItem("userType");
 const currentUserIsAdmin = (userTy?.toLowerCase() === "admin");
 
+// ====== Validation config ======
+const RULES = {
+    title: { min: 4, max: 120 },
+    body: { min: 1, max: 2000 },
+    comment: { min: 1, max: 500 },
+    image: { exts: ["image/jpeg", "image/png", "image/gif", "image/webp"], max: 5 * 1024 * 1024 },
+    video: { exts: ["video/mp4", "video/webm", "video/ogg"], max: 50 * 1024 * 1024 }
+};
+
+// ====== Small helpers ======
+function setErr($el, msg) {
+    $el.text(msg || "").toggleClass("d-none", !msg);
+}
+function sanitizeInput(s) { return (s || "").replace(/\s+/g, " ").trim(); }
+
+// Validate file by type/size; returns {ok:boolean,msg:string,mediaType:"image"|"video"|null}
+function validateFile(file) {
+    if (!file) return { ok: true, msg: "", mediaType: null };
+    const t = file.type.toLowerCase();
+
+    if (t.startsWith("image/")) {
+        if (!RULES.image.exts.includes(t)) return { ok: false, msg: "Unsupported image type.", mediaType: null };
+        if (file.size > RULES.image.max) return { ok: false, msg: "Image must be ≤ 5 MB.", mediaType: null };
+        return { ok: true, msg: "", mediaType: "image" };
+    }
+    if (t.startsWith("video/")) {
+        if (!RULES.video.exts.includes(t)) return { ok: false, msg: "Unsupported video type.", mediaType: null };
+        if (file.size > RULES.video.max) return { ok: false, msg: "Video must be ≤ 50 MB.", mediaType: null };
+        return { ok: true, msg: "", mediaType: "video" };
+    }
+    return { ok: false, msg: "Only images or videos are allowed.", mediaType: null };
+}
 function initialsFromName(name) {
     const parts = (name || "").trim().split(/\s+/).filter(Boolean);
     if (parts.length === 0) return "";
@@ -167,9 +199,13 @@ function hydratePostCard($card, postId) {
 
 (function () {
     let selectedFile = null;
-    const fileInput = document.getElementById('postImage');
-    const previewDiv = document.getElementById('composerPreview');
-
+    const $title = $("#postTitle");
+    const $body = $("#postText");
+    const $btnPost = $(".crw-btn-post");   // the Post button
+    const fileInput = document.getElementById("postImage");
+    const previewDiv = document.getElementById("composerPreview");
+    /*const fileInput = document.getElementById('postImage');
+    const previewDiv = document.getElementById('composerPreview');*/
     function renderComposerPreview(file) {
         previewDiv.innerHTML = "";
         if (!file) return;
@@ -186,15 +222,104 @@ function hydratePostCard($card, postId) {
         previewDiv.innerHTML = html;
     }
 
-    if (fileInput) {
+    /*if (fileInput) {
         fileInput.addEventListener('change', (e) => {
             selectedFile = e.target.files?.[0] || null;
+            renderComposerPreview(selectedFile);
+        });
+    }*/
+    if (fileInput) {
+        fileInput.addEventListener("change", (e) => {
+            selectedFile = e.target.files?.[0] || null;
+            const vf = validateFile(selectedFile);
+            setErr($("#postMediaErr"), vf.ok ? "" : vf.msg);
             renderComposerPreview(selectedFile);
         });
     }
 
     // submitPost 
     window.submitPost = function () {
+        const title = sanitizeInput($title.val());
+        const body = sanitizeInput($body.val());
+
+        // validate file
+
+        const fileCheck = validateFile(selectedFile);
+        if (!fileCheck.ok) { setErr($("#postMediaErr"), fileCheck.msg); return; }
+        setErr($("#postMediaErr"), "");
+
+        // at least one content piece
+        /*if (!title && !body && !selectedFile) {
+            setErr($("#postTitleErr"), "Add a title, text, or media.");
+            setErr($("#postTextErr"), "");
+            return;
+        }
+        */
+        // at least one content piece
+        if (!title && !body && !selectedFile) {
+            setErr($("#postTitleErr"), "Title is required.");
+            setErr($("#postTextErr"), "Text is required."); // <-- add this line
+            return;
+        } else if (!title) {
+            setErr($("#postTitleErr"), "Title is required.");
+            return;
+        } else if (!body) {
+            setErr($("#postTextErr"), "Text is required."); // <-- add this line
+            return;
+        } else {
+            setErr($("#postTitleErr"), "");
+            setErr($("#postTextErr"), "");  // <-- clear when ok
+            setErr($("#postMediaErr"), "");
+        }
+
+
+        // length checks only if provided
+        if (title && (title.length < RULES.title.min || title.length > RULES.title.max)) {
+            setErr($("#postTitleErr"), `Title must be ${RULES.title.min}-${RULES.title.max} characters.`);
+            return;
+        } else setErr($("#postTitleErr"), "");
+
+        if (body && (body.length < RULES.body.min || body.length > RULES.body.max)) {
+            setErr($("#postTextErr"), `Text must be ${RULES.body.min}-${RULES.body.max} characters.`);
+            return;
+        } else setErr($("#postTextErr"), "");
+
+        // build form data
+        const fd = new FormData();
+        fd.append("Title", title);
+        fd.append("Body", body);
+        if (selectedFile) fd.append("Media", selectedFile);
+
+        // UX: disable button while posting
+        $btnPost.prop("disabled", true).text("Posting…");
+        debugger;
+        $.ajax({
+            url: "/api/posts",
+            type: "POST",
+            data: fd,
+            processData: false,
+            contentType: false
+        })
+            .done(function (res) {
+                debugger;
+                $("#postContainer").prepend(renderFbPostCard(res, currentUserIsAdmin));
+                swal("Process Completed!", "The Post has been Added!", "success");
+                // reset
+                $title.val(""); $body.val("");
+                if (fileInput) fileInput.value = "";
+                selectedFile = null; previewDiv.innerHTML = "";
+                setErr($("#postTitleErr"), ""); setErr($("#postTextErr"), ""); setErr($("#postMediaErr"), "");
+            })
+            .fail(function (xhr) {
+                debugger;
+                swal("Failed", xhr.responseText || "Failed to create post.", "error");
+            })
+            .always(function () {
+                debugger;
+                $btnPost.prop("disabled", false).text("Post");
+            });
+    };
+    /*window.submitPost = function () {
         const title = ($("#postTitle").val() || "").trim();
         const body = ($("#postText").val() || "").trim();
         if (!title && !body && !selectedFile) { alert("Write something or add media."); return; }
@@ -223,6 +348,7 @@ function hydratePostCard($card, postId) {
                 alert(xhr.responseText || "Failed to create post.");
             });
     };
+*/
     getPost();
 
     function getPost() {
@@ -261,11 +387,25 @@ function hydratePostCard($card, postId) {
 
     // Submit comment
     $(document).on("click", ".btn-submit-comment", function () {
-        const $card = $(this).closest(".crw-event-card");
+       /* const $card = $(this).closest(".crw-event-card");
         const postId = $card.data("id");
         const $input = $card.find(".comment-input");
         const text = ($input.val() || "").trim();
-        if (!text) return;
+        if (!text) return;*/
+        const $card = $(this).closest(".crw-event-card");
+        const postId = $card.data("id");
+        const $input = $card.find(".comment-input");
+        const text = sanitizeInput($input.val());
+
+        if (!text || text.length < RULES.comment.min || text.length > RULES.comment.max) {
+            $input.addClass("is-invalid");
+            if (!$card.find(".comment-err").length) {
+                $input.after(`<div class="invalid-feedback comment-err">Comment must be ${RULES.comment.min}-${RULES.comment.max} characters.</div>`);
+            }
+            return;
+        }
+        $input.removeClass("is-invalid");
+        $card.find(".comment-err").remove();
 
         $.ajax({
             url: `/api/posts/${postId}/comment`,

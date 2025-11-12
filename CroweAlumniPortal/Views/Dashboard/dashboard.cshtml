@@ -26,7 +26,7 @@
                     <!-- Facebook -->
                     <div class="col-auto">
                         <a href="#" class="crw-social-icon crw-facebook js-share" data-net="facebook" title="Share on Facebook">
-                            <i class="fab fa-facebook-f"></i>
+                            <i class="bi bi-facebook"></i>
                         </a>
                     </div>
 
@@ -40,7 +40,7 @@
                     <!-- LinkedIn -->
                     <div class="col-auto">
                         <a href="#" class="crw-social-icon crw-linkedin js-share" data-net="linkedin" title="Share on LinkedIn">
-                            <i class="fab fa-linkedin-in"></i>
+                            <i class="bi bi-linkedin"></i>
                         </a>
                     </div>
                 </div>
@@ -63,9 +63,31 @@
 
                     <!-- Discussion TAB -->
                     <div class="crw-discussion-body" id="post-tab">
-                        <input id="postTitle" type="text" placeholder="Enter title" class="crw-input-title" />
+                        @* <input id="postTitle" type="text" placeholder="Enter title" class="crw-input-title" />
                         <textarea id="postText" placeholder="Write your thought..." class="crw-textarea-desc"></textarea>
                         <input type="file" id="postImage" accept="image/*,video" hidden />
+                        <!-- PREVIEW -->
+                        <div id="postPreview" class="mt-2" style="display:none;"></div>
+                        <div id="composerPreview" class="mt-2"></div> *@
+                        @* <input id="postTitle" type="text" placeholder="Enter title" class="crw-input-title" />
+                        <small id="postTitleErr" class="text-danger d-none"></small>
+
+                        <textarea id="postText" placeholder="Write your thought..." class="crw-textarea-desc"></textarea>
+                        <small id="postTextErr" class="text-danger d-none"></small>
+
+                        <input type="file" id="postImage" accept="image/*,video/*" hidden />
+                        <small id="postMediaErr" class="text-danger d-none"></small> *@
+
+                        <input id="postTitle" type="text" placeholder="Enter title" class="crw-input-title" />
+                        <small id="postTitleErr" class="text-danger d-none"></small>
+
+                        <textarea id="postText" placeholder="Write your thought..." class="crw-textarea-desc"></textarea>
+                        <small id="postTextErr" class="text-danger d-none"></small>
+
+                        <input type="file" id="postImage" accept="image/*,video/*" hidden />
+                        <small id="postMediaErr" class="text-danger d-none"></small>
+
+
                         <!-- PREVIEW -->
                         <div id="postPreview" class="mt-2" style="display:none;"></div>
                         <div id="composerPreview" class="mt-2"></div>
@@ -73,7 +95,7 @@
                         <!-- ICONS SECTION -->
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div class="d-flex gap-3">
-                                <i class="fa-solid fa-image text-success fs-5" onclick="$('#postImage').click()"></i>
+                                <i class="bi bi-card-image text-success fs-4 fw-bold" onclick="$('#postImage').click()"></i>
                             </div>
                             <button class="crw-btn-post" onclick="submitPost()">Post</button>
                         </div>
