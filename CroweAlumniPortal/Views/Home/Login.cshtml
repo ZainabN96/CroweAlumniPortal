@@ -60,25 +60,21 @@
                                     <!-- body padding adjust -->
                                     <div class="pt-1 pb-2" style="margin-bottom:6px !important;">
                                         <!-- thora kam gap -->
-                                        <h5 class="card-title text-center pb-0 fs-4" style="margin-bottom:4px !important;">LOGIN</h5>
+                                        <h5 class="card-title text-center pb-0 fs-4" style="margin-bottom:4px !important;">LOGIN TO ALUMNI PORTAL</h5>
                                         <p class="text-center small" style="margin-bottom:6px !important;">Access to our Dashboard</p>
                                     </div>
-
-                                    <div class="login-form" id="login">
-                                        <form class="row g-3 needs-validation" style="margin-bottom:0 !important;">
+                                   @*  <div class="login-form">
+                                        <form id="loginForm" class="row g-3 needs-validation" novalidate style="margin-bottom:0 !important;">
                                             <div class="inputlogin-form" style="margin-bottom:6px !important;">
-                                                <!-- login id niche kam gap -->
-                                                <input type="text" name="email" required id="LoginId"
-                                                       onkeyup="this.setAttribute('value', this.value);" autocomplete="off">
-                                                <label for="loginId" class="form-label">Login Id</label>
+                                                <input type="text" class="form-control" name="email" required id="LoginId"
+                                                       autocomplete="off">
+                                                <label for="LoginId" class="form-label">Login Id</label>
                                                 <div class="invalid-feedback">Please enter your Login Id.</div>
-                                                <input type="hidden" name="hidden" autocomplete="false">
                                             </div>
 
                                             <div class="inputlogin-form" style="margin-bottom:10px !important;">
-                                                <!-- password niche normal gap -->
-                                                <input type="password" name="password" required id="Password"
-                                                       onkeyup="this.setAttribute('value', this.value);" autocomplete="off">
+                                                <input type="password" class="form-control" name="password" required id="Password"
+                                                       autocomplete="off">
                                                 <label>Password</label>
                                                 <i class="bi bi-eye-slash" id="eye" onclick="togglePasswordVisibility()"></i>
                                                 <div class="invalid-feedback">Please enter your password!</div>
@@ -87,7 +83,34 @@
                                     </div>
 
                                     <div class="col-12 mb-2" style="margin-bottom:10px !important;">
-                                        <button class="btn btn-primary account-btn" type="submit" id="btn_Login" onclick="Login()"
+                                        <!-- type="button" taki default submit na ho -->
+                                        <button class="btn btn-primary account-btn" type="button" id="btn_Login"
+                                                style="margin-bottom:0 !important;">
+                                            Login
+                                        </button>
+                                    </div> *@
+
+                                    <div class="login-form" id="login">
+                                        <form class="row g-3 needs-validation" novalidate style="margin-bottom:0 !important;" id="loginForm">
+                                            <div class="inputlogin-form" style="margin-bottom:6px !important;">
+                                                <!-- login id niche kam gap -->
+                                                <input type="text"  name="email" required id="LoginId" autocomplete="off">
+                                                <label for="LoginId" class="form-label">Login Id</label>
+                                                <div class="invalid-feedback">Please enter your Login Id.</div>
+                                            </div>
+
+                                            <div class="inputlogin-form" style="margin-bottom:10px !important;">
+                                                <!-- password niche normal gap -->
+                                                <input type="password"  name="password" required id="Password" autocomplete="off">
+                                                <label>Password</label>
+                                                <i class="bi bi-eye-slash" id="eye" onclick="togglePasswordVisibility()"></i>
+                                                <div class="invalid-feedback">Please enter your password!</div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <div class="col-12 mb-2" style="margin-bottom:10px !important;">
+                                        <button class="btn btn-primary account-btn" type="button" id="btn_Login"
                                                 style="margin-bottom:0 !important;">
                                             Login
                                         </button>

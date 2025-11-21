@@ -14,6 +14,47 @@ function togglePasswordVisibility() {
 function pageRedirect() {
     window.location.href = "/Dashboard/Dashboard";
 }
+$(function () {
+
+    // Remove error on typing
+    $("#LoginId, #Password").on("input", function () {
+        $(this).removeClass("is-invalid");
+    });
+
+    $("#btn_Login").on("click", function (e) {
+        e.preventDefault();
+
+        var $loginId = $("#LoginId");
+        var $password = $("#Password");
+
+        var loginIdVal = $loginId.val().trim();
+        var passwordVal = $password.val().trim();
+
+        var isValid = true;
+
+        if (!loginIdVal) {
+            $loginId.addClass("is-invalid");
+            isValid = false;
+        } else {
+            $loginId.removeClass("is-invalid");
+        }
+
+        if (!passwordVal) {
+            $password.addClass("is-invalid");
+            isValid = false;
+        } else {
+            $password.removeClass("is-invalid");
+        }
+
+        // agar koi field empty hai to AJAX mat chalao
+        if (!isValid) {
+            return;
+        }
+
+        // yahan se tumhara existing Login() chalega
+        Login();
+    });
+});
 
 function Login() {
     //debugger;

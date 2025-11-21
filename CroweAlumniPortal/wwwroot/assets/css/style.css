@@ -2377,3 +2377,6 @@ h4 {
 .table tbody td {
     vertical-align: middle;
 }
+.notif-hidden {
+    display: none !important;
+}

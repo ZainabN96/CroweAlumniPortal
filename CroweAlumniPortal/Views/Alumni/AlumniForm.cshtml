@@ -41,10 +41,15 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <!-- Profile Picture -->
-                                <label for="profilepic" class="alum-label profilepic-label">Profile Picture</label>
+                                @* <label for="profilepic" class="alum-label profilepic-label">Profile Picture*</label>
                                 <div class="profile-img-box">
                                     <span class="spn" id="profile-pic">Add Picture</span>
-                                    <input type="file" id="profilepic" name="profilepic" accept="image/*" class="file-input">
+                                    <input type="file" id="profilepic" name="profilepic" accept="image/*" class="file-input" required>
+                                </div> *@
+                                <label for="profilepic" class="alum-label profilepic-label">Profile Picture*</label>
+                                <div class="profile-img-box">
+                                    <span class="spn" id="profile-pic">Add Picture</span>
+                                    <input type="file" id="profilepic" name="profilepic" accept="image/*" class="file-input" required>
                                 </div>
 
                                 <!-- LIVE PREVIEW -->
@@ -139,7 +144,7 @@
                         <div class="col-md-6 mb-3">
                             <div class="form-group">
                                 <label for="BG" class="alum-label">Blood Group</label>
-                                <select class="form-select" id="BG" name="bloodgroup">
+                                <select class="form-select" id="BG" name="bloodgroup" required>
                                     <option value="" disabled selected hidden>Select</option>
                                     <option value="A+">A+</option>
                                     <option value="A−">A−</option>
@@ -180,7 +185,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="form-group">
-                                <label for="ZIP" class="alum-label">PostCode/ZIP</label>
+                                <label for="ZIP" class="alum-label">PostCode/ZIP*</label>
                                 <input type="text" class="form-control" id="ZIP" name="ZIP">
                             </div>
                         </div>
@@ -189,16 +194,16 @@
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
                             <div class="form-group">
-                                <label for="homeCountry" class="alum-label">Country</label>
-                                <select class="form-select" id="homeCountry" name="country">
+                                <label for="homeCountry" class="alum-label">Country*</label>
+                                <select class="form-select" id="homeCountry" name="country" required>
                                     <option value="" disabled selected hidden>Select</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="form-group">
-                                <label for="homeCity" class="alum-label">City</label>
-                                <select class="form-select" id="homeCity" name="homeCity">
+                                <label for="homeCity" class="alum-label">City*</label>
+                                <select class="form-select" id="homeCity" name="homeCity" required>
                                     <option value="" disabled selected hidden>Select</option>
                                 </select>
                             </div>
@@ -288,7 +293,7 @@
                         <div class="col-md-6 mb-3">
                             <div class="form-group">
                                 <label for="question" class="alum-label">Please Select One Of The Following Question:</label>
-                                <select class="form-select" id="question" name="question">
+                                <select class="form-select" id="question" name="question" required>
                                     <option value="" disabled selected hidden>Select</option>
                                     <option value="Mother's Maiden Name?">Mother's Maiden Name</option>
                                     <option value="Your Place Town Of Birth?">Your Place Town Of Birth</option>
@@ -299,7 +304,7 @@
                         <div class="col-md-6 mb-3">
                             <div class="form-group">
                                 <label for="answer" class="alum-label">Secrect Answer</label>
-                                <input type="text" class="form-control" id="answer" name="secanswer">
+                                <input type="text" class="form-control" id="answer" name="secanswer" required>
                             </div>
                         </div>
                     </div>
@@ -339,8 +344,8 @@
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
                             <div class="form-group">
-                                <label for="JobTitle" class="alum-label">Job Title</label>
-                                <input type="text" class="form-control" id="JobTitle" name="JobTitle">
+                                <label for="JobTitle" class="alum-label">Job Title*</label>
+                                <input type="text" class="form-control" id="JobTitle" name="JobTitle" required>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -354,16 +359,16 @@
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
                             <div class="form-group">
-                                <label for="empCountry" class="alum-label">Country</label>
-                                <select class="form-select" id="empCountry" name="empCountry">
+                                <label for="empCountry" class="alum-label">Country*</label>
+                                <select class="form-select" id="empCountry" name="empCountry" required>
                                     <option value="" disabled selected hidden>Select</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="form-group">
-                                <label for="empCity" class="alum-label">City</label>
-                                <select class="form-select" id="empCity" name="empCity">
+                                <label for="empCity" class="alum-label">City*</label>
+                                <select class="form-select" id="empCity" name="empCity" required>
                                     <option value="" disabled selected hidden>Select</option>
                                 </select>
                             </div>
@@ -394,8 +399,8 @@
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
                             <div class="form-group">
-                                <label for="staffcode" class="alum-label">Staff Code/Registration Number</label>
-                                <input type="text" class="form-control" id="staffcode" name="staffcode">
+                                <label for="staffcode" class="alum-label">Staff Code/Registration Number*</label>
+                                <input type="text" class="form-control" id="staffcode" name="staffcode" required>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -440,8 +445,8 @@
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
                             <div class="form-group">
-                                <label for="Joiningdate" class="alum-label">Joining Date</label>
-                                <input type="date" class="form-control" id="Joiningdate" name="Joiningdate">
+                                <label for="Joiningdate" class="alum-label">Joining Date*</label>
+                                <input type="date" class="form-control" id="Joiningdate" name="Joiningdate" required>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">

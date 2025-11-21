@@ -1,4 +1,5 @@
 ﻿using CroweAlumniPortal.Data.IServices;
+using CroweAlumniPortal.Dtos;
 using CroweAlumniPortal.Helper;
 using CroweAlumniPortal.Models;
 using Microsoft.AspNetCore.SignalR;
@@ -181,6 +182,42 @@ namespace CroweAlumniPortal.Data.Services
                 admin = adminName,
                 createdOn = notification.CreatedOn
             });
+        }
+        public async Task<List<NotificationListItemDto>> GetAllForUserAsync(int userId)
+        {
+            return await dc.Set<NotificationUser>()
+                .AsNoTracking()
+                .Include(nu => nu.Notification)
+                .Where(nu => nu.UserId == userId)
+                .OrderByDescending(nu => nu.Notification.CreatedOn) // ya jo bhi field ho
+                .Select(nu => new NotificationListItemDto
+                {
+                    NotificationUserId = nu.Id,
+                    NotificationId = nu.NotificationId,
+                    Type = nu.Notification.Type,
+                    Title = nu.Notification.Title,
+                    Message = nu.Notification.Message,
+                    Url = nu.Notification.Url,
+                    IsRead = nu.IsRead,
+                    CreatedOn = nu.Notification.CreatedOn,  // adjust
+                    ReadOn = nu.ReadOn
+                })
+                .ToListAsync();
+        }
+
+        public async Task MarkAsReadAsync(int notificationUserId, int userId)
+        {
+            var entity = await dc.Set<NotificationUser>()
+                .FirstOrDefaultAsync(x => x.Id == notificationUserId && x.UserId == userId);
+
+            if (entity == null) return;
+
+            if (!entity.IsRead)
+            {
+                entity.IsRead = true;
+                entity.ReadOn = DateTime.UtcNow;
+                await dc.SaveChangesAsync();
+            }
         }
     }
 
