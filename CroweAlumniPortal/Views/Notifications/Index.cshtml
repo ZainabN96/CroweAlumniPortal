@@ -11,6 +11,38 @@
         .Distinct()
         .OrderBy(x => x)
         .ToList();
+
+    @functions {
+        public string GetTypeBadgeClass(string type)
+        {
+            if (string.IsNullOrWhiteSpace(type))
+                return "bg-secondary";
+
+            switch (type.ToLowerInvariant())
+            {
+                case "info":
+                    return "bg-info text-dark";
+
+                case "like":
+                    return "bg-primary text-dark";
+
+                case "success":
+                case "message":
+                    return "bg-success";
+
+                case "warning":
+                    return "bg-warning text-dark";
+
+                case "error":
+                case "post-deleted":
+                    return "bg-danger";
+
+                default:
+                    return "bg-secondary";
+            }
+        }
+    }
+
 }
 
 <div class="container mt-4">
@@ -60,10 +92,12 @@
                      data-status="@statusClass"
                      data-id="@n.NotificationUserId"
                      data-type="@n.Type">
-
+            
                     <div class="ms-2 me-auto">
                         <div class="d-flex align-items-center mb-1">
-                            <span class="badge bg-secondary me-2">@n.Type</span>
+                        <span class="badge @GetTypeBadgeClass(n.Type) me-2">
+                            @n.Type
+                        </span>
                             <strong class="notif-title">@n.Title</strong>
                         </div>
 
@@ -109,335 +143,5 @@
 @section Scripts {
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/assets/js/sweet-alert.min.js"></script>
-
-    <script>
-        $(function () {
-
-            let currentStatusFilter = "all";  // all | unread | read
-            let currentTypeFilter   = "all";  // all | some type
-            let currentSearch       = "";     // text
-
-            function applyFilters() {
-                const searchLower = (currentSearch || "").trim().toLowerCase();
-                const typeLower   = (currentTypeFilter || "all").toLowerCase();
-
-                $(".notification-item").each(function () {
-                    const $item = $(this);
-
-                    const status = ($item.attr("data-status") || "").toLowerCase(); // read/unread
-                    const type   = ($item.attr("data-type")   || "").toLowerCase();
-
-                    const title  = ($item.find(".notif-title").text()    || "").toLowerCase();
-                    const msg    = ($item.find(".notif-message").text()  || "").toLowerCase();
-                    const text   = title + " " + msg;
-
-                    // Status match
-                    const okStatus = (currentStatusFilter === "all" || status === currentStatusFilter);
-
-                    // Type match
-                    const okType = (typeLower === "all" || type === typeLower);
-
-                    // Search match
-                    const okSearch = (!searchLower || text.indexOf(searchLower) !== -1);
-
-                    if (okStatus && okType && okSearch) {
-                        $item.removeClass("notif-hidden");
-                    } else {
-                        $item.addClass("notif-hidden");
-                    }
-                });
-            }
-
-            // STATUS FILTER: All / Unread / Read
-            $(".filter-btn").on("click", function () {
-                $(".filter-btn").removeClass("active");
-                $(this).addClass("active");
-
-                currentStatusFilter = $(this).attr("data-filter"); // all / unread / read
-                applyFilters();
-            });
-
-            // TYPE FILTER (dropdown)
-            $("#typeFilter").on("change", function () {
-                currentTypeFilter = $(this).val() || "all";
-                applyFilters();
-            });
-
-            // SEARCH TEXT
-            $("#searchText").on("input", function () {
-                currentSearch = $(this).val() || "";
-                applyFilters();
-            });
-
-            // MARK AS READ
-            $("#notificationList").on("click", ".btn-mark-read", function () {
-                const $item = $(this).closest(".notification-item");
-                const id = $item.attr("data-id");
-
-                $.ajax({
-                    url: '@Url.Action("MarkAsRead", "Notifications")',
-                    type: 'POST',
-                    data: { id: id },
-                    success: function () {
-
-                        $item.attr("data-status", "read")
-                             .removeClass("unread")
-                             .addClass("read");
-
-                        $item.find(".badge.bg-warning").remove();
-                        $item.find(".btn-mark-read").remove();
-                        $item.find(".text-end").prepend('<span class="badge bg-success mb-2">Read</span>');
-
-                        // ab current filters ke hisaab se dobara evaluate karo
-                        applyFilters();
-                    },
-                    error: function () {
-                        swal("Error", "Unable to update notification status.", "error");
-                    }
-                });
-            });
-
-            // OPTIONAL: page load pe bhi filters apply kar do (in case future me default change ho)
-            applyFilters();
-        });
-    </script>
+	<script src="~/assets/js/ajax/notification/all.js"></script>
 }
-
-
-@* 
-@section Scripts {
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/assets/js/sweet-alert.min.js"></script>
-
-    <script>
-        $(function () {
-
-            // STATUS FILTER ONLY (All / Unread / Read)
-            $(".filter-btn").on("click", function () {
-                $(".filter-btn").removeClass("active");
-                $(this).addClass("active");
-
-                const filter = $(this).attr("data-filter"); // all / unread / read
-                console.log("Filter clicked:", filter);
-
-                $(".notification-item").each(function () {
-                    const $item = $(this);
-                    const status = ($item.attr("data-status") || "").toLowerCase(); // read / unread
-
-                    console.log("item status:", status, "filter:", filter);
-
-                    let match =
-                        (filter === "all") ||
-                        (status === filter);
-
-                    if (match) {
-                        $item.removeClass("notif-hidden");
-                    } else {
-                        $item.addClass("notif-hidden");
-                    }
-                });
-            });
-
-            // MARK AS READ
-            $("#notificationList").on("click", ".btn-mark-read", function () {
-                const $item = $(this).closest(".notification-item");
-                const id = $item.attr("data-id");
-
-                $.ajax({
-                    url: '@Url.Action("MarkAsRead", "Notifications")',
-                    type: 'POST',
-                    data: { id: id },
-                    success: function () {
-
-                        $item.attr("data-status", "read")
-                             .removeClass("unread")
-                             .addClass("read");
-
-                        $item.find(".badge.bg-warning").remove();
-                        $item.find(".btn-mark-read").remove();
-                        $item.find(".text-end").prepend('<span class="badge bg-success mb-2">Read</span>');
-
-                        // agar abhi "Unread" filter active hai to is item ko hide kar do
-                        const activeFilter = $(".filter-btn.active").attr("data-filter") || "all";
-                        if (activeFilter === "unread") {
-                            $item.addClass("notif-hidden");
-                        } else {
-                            $item.removeClass("notif-hidden");
-                        }
-                    },
-                    error: function () {
-                        swal("Error", "Unable to update notification status.", "error");
-                    }
-                });
-            });
-
-        });
-    </script>
-}
- *@
-
-@* @section Scripts {
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/assets/js/sweet-alert.min.js"></script>
-
-    <script>
-        $(function () {
-
-            // ✅ STATUS FILTER ONLY (All / Unread / Read)
-            $(".filter-btn").on("click", function () {
-                // active button styling
-                $(".filter-btn").removeClass("active");
-                $(this).addClass("active");
-
-                // filter value: all / unread / read
-                const filter = $(this).attr("data-filter"); 
-
-                console.log("Filter clicked:", filter);
-
-                $(".notification-item").each(function () {
-                    const $item = $(this);
-
-                    // IMPORTANT: attr use karein, data() nahi
-                    const status = ($item.attr("data-status") || "").toLowerCase(); // read / unread
-
-                    // console check
-                    console.log("item status:", status, "filter:", filter);
-
-                    if (filter === "all" || status === filter) {
-                        $item.show();
-                    } else {
-                        $item.hide();
-                    }
-                });
-            });
-
-            // ✅ MARK AS READ
-            $("#notificationList").on("click", ".btn-mark-read", function () {
-                const $item = $(this).closest(".notification-item");
-                const id = $item.attr("data-id");   // attr se lo
-
-                $.ajax({
-                    url: '@Url.Action("MarkAsRead", "Notifications")',
-                    type: 'POST',
-                    data: { id: id },
-                    success: function () {
-                        // status update
-                        $item.attr("data-status", "read")
-                             .removeClass("unread")
-                             .addClass("read");
-
-                        $item.find(".badge.bg-warning").remove();
-                        $item.find(".btn-mark-read").remove();
-                        $item.find(".text-end").prepend('<span class="badge bg-success mb-2">Read</span>');
-
-                        // agar current filter "unread" hai to ab ye item hide ho jaye
-                        const activeFilter = $(".filter-btn.active").attr("data-filter") || "all";
-                        if (activeFilter === "unread") {
-                            $item.hide();
-                        }
-                    },
-                    error: function () {
-                        swal("Error", "Unable to update notification status.", "error");
-                    }
-                });
-            });
-
-        });
-    </script>
-}
- *@
-
-@* @section Scripts {
-    @* agar layout me already jQuery include hai to ye line remove kar sakti ho 
-    <script src="~/assets/js/jquery-3.5.1.js"></script>
-    <script src="~/assets/js/sweet-alert.min.js"></script>
-
-    <script>
-        $(function () {
-
-            let currentStatusFilter = "all";
-            let currentTypeFilter = "all";
-            let currentSearch = "";
-
-            function applyFilters() {
-                const searchLower = currentSearch.trim().toLowerCase();
-
-                $(".notification-item").each(function () {
-                    const $item = $(this);
-                    const status = ($item.data("status") || "").toString().toLowerCase();   // read/unread
-                    const type = ($item.data("type") || "").toString().toLowerCase();
-
-                    const title = ($item.find(".notif-title").text() || "").toLowerCase();
-                    const msg   = ($item.find(".notif-message").text() || "").toLowerCase();
-                    const text  = title + " " + msg;
-
-                    // Status match
-                    let okStatus = (currentStatusFilter === "all" || status === currentStatusFilter);
-
-                    // Type match
-                    let okType = (currentTypeFilter === "all" || type === currentTypeFilter.toLowerCase());
-
-                    // Search match
-                    let okSearch = (!searchLower || text.indexOf(searchLower) !== -1);
-
-                    if (okStatus && okType && okSearch) {
-                        $item.show();
-                    } else {
-                        $item.hide();
-                    }
-                });
-            }
-
-            // Status filter: All / Unread / Read
-            $(".filter-btn").on("click", function () {
-                $(".filter-btn").removeClass("active");
-                $(this).addClass("active");
-
-                currentStatusFilter = $(this).data("filter"); // all / unread / read
-                applyFilters();
-            });
-
-            // Type dropdown
-            $("#typeFilter").on("change", function () {
-                currentTypeFilter = $(this).val();  // all or type text
-                applyFilters();
-            });
-
-            // Search text
-            $("#searchText").on("input", function () {
-                currentSearch = $(this).val() || "";
-                applyFilters();
-            });
-
-            // Mark as read
-            $("#notificationList").on("click", ".btn-mark-read", function () {
-                const $item = $(this).closest(".notification-item");
-                const id = $item.data("id");
-
-                $.ajax({
-                    url: '@Url.Action("MarkAsRead", "Notifications")',
-                    type: 'POST',
-                    data: { id: id },
-                    success: function () {
-                        // Update item
-                        $item.attr("data-status", "read")
-                             .removeClass("unread")
-                             .addClass("read");
-
-                        $item.find(".badge.bg-warning").remove();
-                        $item.find(".btn-mark-read").remove();
-                        $item.find(".text-end").prepend('<span class="badge bg-success mb-2">Read</span>');
-
-                        // Re-apply filters so "Unread" view se hide ho jaye
-                        applyFilters();
-                    },
-                    error: function () {
-                        swal("Error", "Unable to update notification status.", "error");
-                    }
-                });
-            });
-
-        });
-    </script>
-}
- *@
