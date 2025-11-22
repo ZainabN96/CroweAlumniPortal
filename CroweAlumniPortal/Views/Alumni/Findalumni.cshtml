@@ -21,11 +21,66 @@
         </div>
 
         <!-- Description -->
+
         @* <h6 class="mb-4">
             50 Member From Unknown House, Masters in Information Technology, Year 2021
         </h6> *@
 
         <!-- Search Box -->
+        <!-- Filters -->
+        <div class="container py-4">
+            <div class="row g-2 align-items-end">
+
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Country</label>
+                    <select id="filterCountry" class="form-select form-select-sm">
+                        <option value="all">All countries</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">City</label>
+                    <select id="filterCity" class="form-select form-select-sm">
+                        <option value="all">All cities</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Industry</label>
+                    <select id="filterIndustry" class="form-select form-select-sm">
+                        <option value="all">All industries</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted mb-1">Joining Year</label>
+                    <select id="filterJoinYear" class="form-select form-select-sm">
+                        <option value="all">All years</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small text-muted mb-1">Leaving Year</label>
+                    <select id="filterLeaveYear" class="form-select form-select-sm">
+                        <option value="all">All years</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Search</label>
+                    <div class="input-group input-group-sm">
+                        <input type="text"
+                               id="alumniSearch"
+                               class="form-control"
+                               placeholder="Name, job, organization..." />
+                        <button class="btn btn-outline-secondary" id="btnSearch" type="button">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
 
         @* <form class="d-flex" style="max-width: 400px;" onsubmit="return false;">
             <input type="text" id="alumniSearch" class="form-control" placeholder="Enter keyword…">

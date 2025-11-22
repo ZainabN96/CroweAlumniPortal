@@ -169,7 +169,7 @@
                     }
 
                     <!-- Dynamic Past -->
-                    @if (Model.Past.Any())
+                    @* @if (Model.Past.Any())
                     {
                         <h5 class="mt-4 mb-2">Recent Past</h5>
                         @foreach (var ev in Model.Past)
@@ -177,7 +177,7 @@
                             @await Html.PartialAsync("_EventCard", ev)
                         }
                     }
-
+ *@
                 </div>
                 <div id="postContainer"></div>
 
