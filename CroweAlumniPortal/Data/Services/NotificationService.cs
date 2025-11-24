@@ -62,12 +62,13 @@ namespace CroweAlumniPortal.Data.Services
             return await CreateAsync(n, allIds);
         }
 
-        public async Task<List<object>> GetUnreadAsync(int userId, int take = 20)
+        public async Task<List<object>> GetUnreadAsync(int userId, int take)
         {
             return await dc.NotificationUsers
                 .AsNoTracking()
                 .Where(nu => nu.UserId == userId && !nu.IsRead)
                 .OrderByDescending(nu => nu.Id)
+                .Take(take)
                 .Select(nu => new {
                     notifUserId = nu.Id,
                     nu.Notification.Id,

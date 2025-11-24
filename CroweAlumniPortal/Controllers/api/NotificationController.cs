@@ -19,7 +19,7 @@ namespace CroweAlumniPortal.Controllers.api
         }
 
         [HttpGet("user/{userId}/unread")]
-        public async Task<IActionResult> GetUnread(int userId, int take = 10)
+        public async Task<IActionResult> GetUnread(int userId, int take)
         {
             var list = await uow.NotificationService.GetUnreadAsync(userId, take);
             return Ok(list);

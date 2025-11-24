@@ -58,15 +58,16 @@
 
     // MARK AS READ
     $("#notificationList").on("click", ".btn-mark-read", function () {
+        debugger;
         const $item = $(this).closest(".notification-item");
         const id = $item.attr("data-id");
-
+        debugger;
         $.ajax({
-            url: '@Url.Action("MarkAsRead", "Notifications")',
+            url: '/notifications/MarkAsRead',
             type: 'POST',
             data: { id: id },
             success: function () {
-
+                debugger;
                 $item.attr("data-status", "read")
                     .removeClass("unread")
                     .addClass("read");
@@ -74,6 +75,7 @@
                 $item.find(".badge.bg-warning").remove();
                 $item.find(".btn-mark-read").remove();
                 $item.find(".text-end").prepend('<span class="badge bg-success mb-2">Read</span>');
+                //$item.find(".readtime").prepend('(Read: @readOn.Value.ToString("dd-MMM-yyyy hh:mm tt"))');
 
                 // ab current filters ke hisaab se dobara evaluate karo
                 applyFilters();
