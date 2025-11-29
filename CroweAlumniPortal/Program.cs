@@ -30,7 +30,7 @@ builder.Services.AddTransient<ExceptionMiddleware>(services =>
     var next = services.GetRequiredService<RequestDelegate>();
     return new ExceptionMiddleware(next, logger, env);
 });
-
+builder.Services.AddHttpClient();
 builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton(AutoMapperConfig.RegisterMappings());

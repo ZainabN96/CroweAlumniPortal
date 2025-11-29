@@ -253,6 +253,7 @@ function bindProfilePicPreview() {
 
 // ---------- Countries & Cities via CountriesNow ----------
 const CN_BASE = "https://countriesnow.space/api/v0.1/countries";
+//const CN_BASE = '../assets/js/countries_full.json';
 let COUNTRIES_DATA = []; // [{ country, cities:[] }, ...]
 
 function fillSelect($select, items, { placeholder = "Select", valueKey = null, textKey = null } = {}) {
