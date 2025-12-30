@@ -5,6 +5,7 @@ using CroweAlumniPortal.Data.Services;
 using CroweAlumniPortal.Extenstions;
 using CroweAlumniPortal.Helper;
 using CroweAlumniPortal.Middlewares;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,10 +19,24 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromHours(9);
+    options.IdleTimeout = TimeSpan.FromMinutes(20); // 20 minutes
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(o =>
+    {
+        o.LoginPath = "/Home/Login";
+        o.LogoutPath = "/Home/Logout";
+        o.AccessDeniedPath = "/Home/AccessDenied";
+
+        // Agar fixed time chahiye (20 min baad force logout), to:
+        o.SlidingExpiration = false;
+        o.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+    });
+
+
 
 builder.Services.AddTransient<ExceptionMiddleware>(services =>
 {

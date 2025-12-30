@@ -14,11 +14,13 @@ namespace CroweAlumniPortal.Controllers.api
         private IUnitOfWork uow;
         private readonly IMapper mapper;
         private readonly INotificationService notificationService;
-        public EventController(IUnitOfWork uow, IMapper mapper, INotificationService notificationService)
+        private readonly IMailService mailService;
+        public EventController(IUnitOfWork uow, IMapper mapper, INotificationService notificationService, IMailService mailService)
         {
             this.uow = uow;
             this.mapper = mapper;
             this.notificationService = notificationService;
+            this.mailService = mailService;
         }
 
         [HttpPost("create")]
@@ -43,6 +45,30 @@ namespace CroweAlumniPortal.Controllers.api
                 Message = $"{authorName} added a new event: {dto.Title ?? "Untitled"}",
                 Url = relativeUrl
             }, exceptUserId: userId);
+
+            var recipients = await uow.UserService.GetApprovedUserEmailsAsync();
+
+            if (userId.HasValue)
+            {
+                var authorEmail = author?.EmailAddress?.Trim();
+                if (!string.IsNullOrWhiteSpace(authorEmail))
+                    recipients = recipients.Where(e => !string.Equals(e, authorEmail, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            foreach (var to in recipients)
+            {
+                try
+                {
+                    var subject = EmailTemplates.EventCreatedSubject(dto.Title);
+                    var body = EmailTemplates.EventCreatedBody(authorName, dto.Title, dto.Description, dto.StartDateTime, $"{Request.Scheme}://{Request.Host}/Dashboard/Eventsdetail?id={created.Id}");
+                    await mailService.SendEmailAsync(new MailRequestDto { ToEmail = to, Subject = subject, Body = body });
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending event created email to {to}: {ex.Message}");
+                }
+            }
 
             return Ok(created);
         }

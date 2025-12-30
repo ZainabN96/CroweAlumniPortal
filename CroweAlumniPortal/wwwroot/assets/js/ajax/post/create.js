@@ -39,8 +39,27 @@ function initialsFromName(name) {
     if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
     return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
-
 function timeAgo(iso) {
+    debugger;
+    if (!iso) return "";
+    const s = String(iso);
+    const then = new Date(s.endsWith("Z") || s.includes("+") ? s : s + "Z");
+    if (isNaN(then)) return "";
+
+    const now = new Date();
+    const diff = (now - then) / 1000;
+
+    if (diff < 60) return "Just now";
+    const m = Math.floor(diff / 60);
+    if (m < 60) return `${m} min ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h} h ago`;
+    const d = Math.floor(h / 24);
+    if (d < 7) return `${d} d ago`;
+    return then.toLocaleDateString();
+}
+
+/*function timeAgo(iso) {
     // Force treat timestamp as UTC
     const then = new Date(iso + "Z");
     const now = new Date();
@@ -61,7 +80,7 @@ function timeAgo(iso) {
 
     return then.toLocaleDateString();
 }
-
+*/
 // media preview builder
 function mediaBlock(p) {
     if (!p.mediaPath) return "";
@@ -75,7 +94,7 @@ function mediaBlock(p) {
 }
 
 function renderComment(c) {
-    //debugger;
+    debugger;
     const name = `${c.author?.firstName ?? ""} ${c.author?.lastName ?? ""}`.trim() || "Unknown";
     const hasPic = !!c.author?.profilePicturePath;
     const av = hasPic
@@ -414,7 +433,9 @@ function hydratePostCard($card, postId) {
             data: JSON.stringify({ body: text })
         })
             .done(res => {
+                debugger;
                 $card.find(".comments").append(renderComment(res));
+               // $card.find(".comments").append(hydratePostCard());
                 $input.val("");
 
             })

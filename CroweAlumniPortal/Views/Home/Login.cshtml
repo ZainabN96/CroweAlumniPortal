@@ -94,15 +94,16 @@
                                         <form class="row g-3 needs-validation" novalidate style="margin-bottom:0 !important;" id="loginForm">
                                             <div class="inputlogin-form" style="margin-bottom:6px !important;">
                                                 <!-- login id niche kam gap -->
-                                                <input type="text"  name="email" required id="LoginId" autocomplete="off">
+                                                <input type="text" name="email" required id="LoginId" onkeyup="this.setAttribute('value', this.value);" autocomplete="off">
                                                 <label for="LoginId" class="form-label">Login Id</label>
                                                 <div class="invalid-feedback">Please enter your Login Id.</div>
+                                                <input type="hidden" name="hidden" autocomplete="false">
                                             </div>
 
                                             <div class="inputlogin-form" style="margin-bottom:10px !important;">
                                                 <!-- password niche normal gap -->
-                                                <input type="password"  name="password" required id="Password" autocomplete="off">
-                                                <label>Password</label>
+                                                <input type="password" name="password" required id="Password" onkeyup="this.setAttribute('value', this.value);" autocomplete="off">
+                                                <label for="Password">Password</label>
                                                 <i class="bi bi-eye-slash" id="eye" onclick="togglePasswordVisibility()"></i>
                                                 <div class="invalid-feedback">Please enter your password!</div>
                                             </div>
@@ -126,7 +127,7 @@
                                     </form>
                                 </div>
                             </div>
-
+                        </div>
                     </div>
                 </div>
 
@@ -136,7 +137,7 @@
     </main><!-- End #main -->
     <footer id="toggle-sidebar footer" class="footer">
         <div class="copyright">
-            &copy; Powered by <strong><span>Crowe Technology Foundation</span></strong>.
+            &copy; Powered by <strong><span>HCC Technology Foundation</span></strong>.
         </div>
     </footer>
     <!-- Vendor JS Files -->

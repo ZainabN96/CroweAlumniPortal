@@ -5,6 +5,8 @@ using CroweAlumniPortal.Dtos;
 using CroweAlumniPortal.Helper;
 using CroweAlumniPortal.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
+using Org.BouncyCastle.Asn1.X509;
 
 namespace CroweAlumniPortal.Controllers.api
 {
@@ -17,6 +19,7 @@ namespace CroweAlumniPortal.Controllers.api
         private readonly IMapper mapper;
         private readonly INotificationService notificationService;
         private readonly IMailService mailService;
+        private const string BaseUrl = "https://alumni.crowe.pk/";
 
         public PostsController(IUnitOfWork uow, IFileService files, IMapper mapper, INotificationService notificationService, IMailService mailService)
         {
@@ -68,6 +71,41 @@ namespace CroweAlumniPortal.Controllers.api
                 Message = $"{authorName} added a new post: {dto.Title ?? "Untitled"}",
                 Url = $"/Posts/Details/{created.Id}"
             }, exceptUserId: userId);
+            // ✉ Email to all only Approved users
+            var allUsers = await uow.UserService.ListAllAsync(); // create this if missing
+            var recipients = allUsers
+                .Where(u => u.ApprovalStatus == UserApprovalStatus.Approved)
+                .Where(u => !string.IsNullOrWhiteSpace(u.EmailAddress))
+                .Where(u => !userId.HasValue || u.Id != userId.Value)
+                .ToList();
+
+            var postUrl = $"{BaseUrl}/Posts/Details/{created.Id}"; 
+            foreach (var r in recipients)
+            {
+                try
+                {
+                    var receiverName = $"{r.FirstName} {r.LastName}".Trim();
+                    var subject = EmailTemplates.PostCreatedSubject(created.Title ?? "Untitled");
+                    var body = EmailTemplates.PostCreatedBody(
+                        receiverName,
+                        authorName,
+                        created.Title ?? "Untitled",
+                        created.Body,
+                        postUrl
+                    );
+
+                    await mailService.SendEmailAsync(new MailRequestDto
+                    {
+                        ToEmail = r.EmailAddress,
+                        Subject = subject,
+                        Body = body
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending event created email to {r.EmailAddress}: {ex.Message}");
+                }
+            }
 
             return Ok(new
             {
@@ -199,7 +237,35 @@ namespace CroweAlumniPortal.Controllers.api
                         Message = $"{likerName} liked {postTitle}.",
                         Url = $"/Posts/Details/{id}"
                     }, ownerId.Value);
+                    try
+                    {
+                        var owner = await uow.UserService.Get(ownerId.Value);
+                        if (owner != null && !string.IsNullOrWhiteSpace(owner.EmailAddress))
+                        {
+                            var ownerName = $"{owner.FirstName} {owner.LastName}".Trim();
+                            var subject = EmailTemplates.PostLikedSubject(likerName);
+                            var body = EmailTemplates.PostLikedBody(
+                                ownerName,
+                                likerName,
+                                post?.Title ?? "your post",
+                                $"{BaseUrl}/Posts/Details/{id}"
+                            );
+
+                            await mailService.SendEmailAsync(new MailRequestDto
+                            {
+                                ToEmail = owner.EmailAddress,
+                                Subject = subject,
+                                Body = body
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error sending event created email to onwer: {ex.Message}");
+                    }
+
                 }
+
             }
 
             var count = await uow.PostService.GetLikeCountAsync(id);
@@ -223,7 +289,7 @@ namespace CroweAlumniPortal.Controllers.api
             return Ok();
         }
 
-        [HttpPost("{postId}/comment")]
+        /*[HttpPost("{postId}/comment")]
         public async Task<IActionResult> Comment(int postId, [FromBody] CommentDto dto)
         {
             var userId = int.Parse(HttpContext.Session.GetString("UserId"));
@@ -246,12 +312,190 @@ namespace CroweAlumniPortal.Controllers.api
                     Message = $"{likerName} has commented on {postTitle}.",
                     Url = $"/Dashboard/Dashboard#post-{postId}"
                 }, ownerId.Value);
+                // ✉ Email to post owner on COMMENT
+                try
+                {
+                    var owner = await uow.UserService.Get(ownerId.Value);
+                    if (owner != null && !string.IsNullOrWhiteSpace(owner.EmailAddress))
+                    {
+                        var ownerName = $"{owner.FirstName} {owner.LastName}".Trim();
+                        var subject = EmailTemplates.PostCommentedSubject(likerName); // likerName is commenter here
+                        var body = EmailTemplates.PostCommentedBody(
+                            ownerName,
+                            likerName,
+                            post?.Title ?? "your post",
+                            dto?.Body,
+                            $"{BaseUrl}/Posts/Details/{postId}"
+                        );
+
+                        await mailService.SendEmailAsync(new MailRequestDto
+                        {
+                            ToEmail = owner.EmailAddress,
+                            Subject = subject,
+                            Body = body
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending event created email to owner: {ex.Message}");
+                }
             }
 
             return Ok(comment);
         }
+*/
+        /*[HttpPost("{postId}/comment")]
+        public async Task<IActionResult> Comment(int postId, [FromBody] CommentDto dto)
+        {
+            var userIdStr = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrWhiteSpace(userIdStr) || !int.TryParse(userIdStr, out var userId))
+                return Unauthorized();
 
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Body))
+                return BadRequest("Comment is required.");
 
+            dto.PostId = postId;
+
+            // Ensure your service sets CreatedOn = DateTime.UtcNow
+            var saved = await uow.PostService.AddCommentAsync(dto, userId);
+
+            // Post owner
+            var ownerId = await uow.PostService.GetOwnerIdAsync(postId);
+
+            // Comment author
+            var author = await uow.UserService.Get(userId);
+
+            // Post (for title)
+            var post = await uow.PostService.GetByIdAsync(postId);
+
+            // Notification + Email to owner (only if owner is different person)
+            if (ownerId.HasValue)
+            {
+                var liker = await uow.UserService.Get(userId);
+                var post = await uow.PostService.GetByIdAsync(postId);
+
+                var likerName = ((liker?.FirstName ?? "") + " " + (liker?.LastName ?? "")).Trim();
+                var postTitle = string.IsNullOrWhiteSpace(post?.Title) ? "your post" : $"\"{post!.Title}\"";
+
+                await notificationService.CreateForUserAsync(new Notification
+                {
+                    Type = "comment",
+                    Title = "New comment on your post",
+                    Message = $"{likerName} has commented on {postTitle}.",
+                    Url = $"/Dashboard/Dashboard#post-{postId}"
+                }, ownerId.Value);
+                // ✉ Email to post owner on COMMENT
+                try
+                {
+                    var owner = await uow.UserService.Get(ownerId.Value);
+                    if (owner != null && !string.IsNullOrWhiteSpace(owner.EmailAddress))
+                    {
+                        var ownerName = $"{owner.FirstName} {owner.LastName}".Trim();
+                        var subject = EmailTemplates.PostCommentedSubject(likerName); // likerName is commenter here
+                        var body = EmailTemplates.PostCommentedBody(
+                            ownerName,
+                            likerName,
+                            post?.Title ?? "your post",
+                            dto?.Body,
+                            $"{BaseUrl}/Posts/Details/{postId}"
+                        );
+
+                        await mailService.SendEmailAsync(new MailRequestDto
+                        {
+                            ToEmail = owner.EmailAddress,
+                            Subject = subject,
+                            Body = body
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending post commented email to onwer: {ex.Message}");
+                }
+            }
+
+            // ✅ Return same shape your UI expects
+            return Ok(new
+            {
+                id = saved.Id,
+                body = saved.Body,
+                createdOn = saved.CreatedOn, // should be UTC Now
+                author = author == null ? null : new
+                {
+                    firstName = author.FirstName,
+                    lastName = author.LastName,
+                    profilePicturePath = author.ProfilePicturePath
+                }
+            });
+        }
+*/
+        [HttpPost("{postId}/comment")]
+        public async Task<IActionResult> Comment(int postId, [FromBody] CommentDto dto)
+        {
+            var userId = int.Parse(HttpContext.Session.GetString("UserId"));
+            dto.PostId = postId;
+            var comment = await uow.PostService.AddCommentAsync(dto, userId);
+            var ownerId = await uow.PostService.GetOwnerIdAsync(postId);
+            var author = await uow.UserService.Get(userId);
+            if (ownerId.HasValue)
+            {
+                var liker = await uow.UserService.Get(userId);
+                var post = await uow.PostService.GetByIdAsync(postId);
+
+                var likerName = ((liker?.FirstName ?? "") + " " + (liker?.LastName ?? "")).Trim();
+                var postTitle = string.IsNullOrWhiteSpace(post?.Title) ? "your post" : $"\"{post!.Title}\"";
+
+                await notificationService.CreateForUserAsync(new Notification
+                {
+                    Type = "comment",
+                    Title = "New comment on your post",
+                    Message = $"{likerName} has commented on {postTitle}.",
+                    Url = $"/Dashboard/Dashboard#post-{postId}"
+                }, ownerId.Value);
+                // ✉ Email to post owner on COMMENT
+                try
+                {
+                    var owner = await uow.UserService.Get(ownerId.Value);
+                    if (owner != null && !string.IsNullOrWhiteSpace(owner.EmailAddress))
+                    {
+                        var ownerName = $"{owner.FirstName} {owner.LastName}".Trim();
+                        var subject = EmailTemplates.PostCommentedSubject(likerName); // likerName is commenter here
+                        var body = EmailTemplates.PostCommentedBody(
+                            ownerName,
+                            likerName,
+                            post?.Title ?? "your post",
+                            dto?.Body,
+                            $"{BaseUrl}/Posts/Details/{postId}"
+                        );
+
+                        await mailService.SendEmailAsync(new MailRequestDto
+                        {
+                            ToEmail = owner.EmailAddress,
+                            Subject = subject,
+                            Body = body
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending post commented email to onwer: {ex.Message}");
+                }
+            }
+
+            return Ok(new
+            {
+                id = comment.Id,
+                body = comment.Body,
+                createdOn = comment.CreatedOn, // should be UTC Now
+                author = author == null ? null : new
+                {
+                    firstName = author.FirstName,
+                    lastName = author.LastName,
+                    profilePicturePath = author.ProfilePicturePath
+                }
+            });
+        }
         [HttpGet("{postId}/comments")]
         public async Task<IActionResult> GetComments(int postId)
         {

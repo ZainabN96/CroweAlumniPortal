@@ -49,14 +49,14 @@ namespace CroweAlumniPortal.Dtos
         public string? SecretAnswer { get; set; }
 
         // Employer
-        [Required] public string Industry { get; set; } = default!;
-        [Required] public string EmployerOrganization { get; set; } = default!;
+        public string? Industry { get; set; } = default!;
+        public string? EmployerOrganization { get; set; } = default!;
         public string? JobTitle { get; set; }
         public string? EmployerCountry { get; set; }
         public string? EmployerCity { get; set; }
         public string? EmployerLandline1 { get; set; }
         public string? EmployerFaxNumber { get; set; }
-        [Required] public string EmployerAddress { get; set; } = default!;
+       public string? EmployerAddress { get; set; } = default!;
 
         // History
         public string? StaffCode { get; set; }

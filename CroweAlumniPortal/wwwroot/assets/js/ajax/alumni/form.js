@@ -454,7 +454,6 @@ function validateRegistrationForm() {
     clearAllFieldErrors();
     let isValid = true;
 
-    // Helper to check required text/select
     const requireField = (selector, message) => {
         if (!v(selector)) {
             showFieldError(selector, message);
@@ -462,28 +461,23 @@ function validateRegistrationForm() {
         }
     };
 
-    // ===== PROFILE=====
+    // ===== Model Required =====
     requireField("#title", "Title is required.");
     requireField("#fullName", "First Name is required.");
     requireField("#lastname", "Last Name is required.");
     requireField("#dob", "Date of Birth is required.");
 
-    // DOB should not be in future
+    // DOB future not allowed
     if (v("#dob")) {
         const dob = new Date(v("#dob"));
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (dob > today) {
-            showFieldError("#dob", "Date of Birth cannot be in the future.");
-            isValid = false;
-        }
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        if (dob > today) { showFieldError("#dob", "DOB cannot be in the future."); isValid = false; }
     }
 
-    // MemberStatus, Qualification (Required in model)
-    requireField("#memberStatus", "Member status is required.");
+    // Qualification required
     requireField("#qualification", "Qualification is required.");
 
-    // CNIC (Required + 13 digits without dashes)
+    // CNIC required + 13 digits
     if (!v("#cnic")) {
         showFieldError("#cnic", "CNIC is required.");
         isValid = false;
@@ -492,105 +486,225 @@ function validateRegistrationForm() {
         isValid = false;
     }
 
-    // ===== HOME ADDRESS (C# [Required]) =====
+    // Address required
     requireField("#address", "Home address is required.");
-    requireField("#homeCountry", "Home country is required.");
-    requireField("#homeCity", "Home city is required.");
 
-    // Mobile optional in DB, lekin usually form level pe chahiye:
-    if (!v("#mobileNumber")) {
-        showFieldError("#mobileNumber", "Mobile number is required.");
-        isValid = false;
-    }
-
-    // EmailAddress [Required]
+    // EmailAddress required + format
     if (!v("#emaiaddress")) {
         showFieldError("#emaiaddress", "Email address is required.");
         isValid = false;
     } else {
-        const email = v("#emaiaddress");
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        if (!emailRegex.test(v("#emaiaddress"))) {
             showFieldError("#emaiaddress", "Please enter a valid email address.");
             isValid = false;
         }
     }
 
-    // ===== EMPLOYMENT & LOGIN (C# [Required]) =====
-    // EmploymentStatus
+    // EmploymentStatus required
     requireField("#empStatus", "Employment status is required.");
 
-    // Passwords (Password [Required] in model)
-    if (!v("#password") || !v("#cnfrmpassword")) {
-        showFieldError("#password", "Password and Confirm Password are required.");
-        showFieldError("#cnfrmpassword", "Password and Confirm Password are required.");
-        isValid = false;
-    } else if (v("#password") !== v("#cnfrmpassword")) {
+    // Password required + match
+    if (!v("#password")) { showFieldError("#password", "Password is required."); isValid = false; }
+    if (!v("#cnfrmpassword")) { showFieldError("#cnfrmpassword", "Confirm Password is required."); isValid = false; }
+    if (v("#password") && v("#cnfrmpassword") && v("#password") !== v("#cnfrmpassword")) {
         showFieldError("#cnfrmpassword", "Passwords do not match.");
         isValid = false;
     }
 
-    // ===== CURRENT EMPLOYER (Required in model) =====
-    requireField("#industry", "Current industry is required.");
-    requireField("#ORG", "Current organization is required.");
-    requireField("#EmployerAddress", "Employer address is required.");
-
-    // EmployerCountry / EmployerCity optional in model but recommended:
-    if (!v("#empCountry")) {
-        showFieldError("#empCountry", "Employer country is required.");
-        isValid = false;
-    }
-    if (!v("#empCity")) {
-        showFieldError("#empCity", "Employer city is required.");
-        isValid = false;
-    }
-
-    // ===== CROWE HISTORY (Required in model) =====
+    // Crowe History required
+    //requireField("#staffcode", "Staff Code is required.");
     requireField("#lastposition", "Last position held is required.");
     requireField("#department", "Department is required.");
     requireField("#historycity", "Crowe city/location is required.");
-    requireField("#leavingdate", "Leaving date is required.");
     requireField("#Joiningdate", "Joining date is required.");
-    requireField("#staffcode", "Staff Code is required.");
-    requireField("#question", "Secrect question is required.");
-    requireField("#answer", "Secrect question's answer is required.");
-    requireField("#BG", "Blood Group is required.");
-    requireField("#JobTitle", "Job Title is required.");
+    requireField("#leavingdate", "Leaving date is required.");
 
-    // LeavingDate >= JoiningDate (if JoiningDate given)
+    // LeavingDate >= JoiningDate
     if (v("#Joiningdate") && v("#leavingdate")) {
         const join = new Date(v("#Joiningdate"));
         const leave = new Date(v("#leavingdate"));
-        if (leave < join) {
-            showFieldError("#leavingdate", "Leaving date cannot be before joining date.");
-            isValid = false;
-        }
+        if (leave < join) { showFieldError("#leavingdate", "Leaving date cannot be before joining date."); isValid = false; }
     }
 
-    if (!requireFile("#profilepic", "Profile picture is required.")) {
-        isValid = false;
-    }
+    // Profile picture: required (agar tum DB me required treat kar rahi ho)
+    if (!requireFile("#profilepic", "Profile picture is required.")) isValid = false;
 
     function requireFile(selector, message) {
-        const $field = $(selector);
-        const el = $field[0];
-
-        if (!el || !el.files || el.files.length === 0) {
-            showFieldError(selector, message);
-            return false;
-        }
+        const el = $(selector)[0];
+        if (!el?.files?.length) { showFieldError(selector, message); return false; }
         return true;
     }
 
-
-    // ===== Privacy Consent (AgreePrivacy [Required]) =====
+    // AgreePrivacy required
     if (!$("#agreePrivacy").is(":checked")) {
         showFieldError("#agreePrivacy", "You must agree to the privacy statement.");
         isValid = false;
     }
 
+    // ===== Current Employer ONLY if NOT UnEmployed =====
+    const status = (v("#empStatus") || "").toLowerCase();
+    //const isUnemployed = status === "unemployed";
+
+    //if (shouldShow) {
+    const st = (v("#empStatus") || "").toLowerCase();
+    const needEmployer = !(st === "unemployed" || st === "retired");
+
+    if (needEmployer) { 
+        // NOTE: in model these are nullable, but business rule: employed => required
+        requireField("#industry", "Current industry is required.");
+        requireField("#ORG", "Current organization is required.");
+        requireField("#JobTitle", "Job title is required.");
+        requireField("#empCountry", "Employer country is required.");
+        requireField("#empCity", "Employer city is required.");
+        requireField("#EmployerAddress", "Employer address is required.");
+    }
+
     return isValid;
 }
+
+/*//function validateRegistrationForm() {
+//    clearAllFieldErrors();
+//    let isValid = true;
+
+//    // Helper to check required text/select
+//    const requireField = (selector, message) => {
+//        if (!v(selector)) {
+//            showFieldError(selector, message);
+//            isValid = false;
+//        }
+//    };
+
+//    // ===== PROFILE=====
+//    requireField("#title", "Title is required.");
+//    requireField("#fullName", "First Name is required.");
+//    requireField("#lastname", "Last Name is required.");
+//    requireField("#dob", "Date of Birth is required.");
+
+//    // DOB should not be in future
+//    if (v("#dob")) {
+//        const dob = new Date(v("#dob"));
+//        const today = new Date();
+//        today.setHours(0, 0, 0, 0);
+//        if (dob > today) {
+//            showFieldError("#dob", "Date of Birth cannot be in the future.");
+//            isValid = false;
+//        }
+//    }
+
+//    // MemberStatus, Qualification (Required in model)
+//    requireField("#memberStatus", "Member status is required.");
+//    requireField("#qualification", "Qualification is required.");
+
+//    // CNIC (Required + 13 digits without dashes)
+//    if (!v("#cnic")) {
+//        showFieldError("#cnic", "CNIC is required.");
+//        isValid = false;
+//    } else if (!/^\d{13}$/.test(v("#cnic"))) {
+//        showFieldError("#cnic", "CNIC must be 13 digits without dashes.");
+//        isValid = false;
+//    }
+
+//    // ===== HOME ADDRESS (C# [Required]) =====
+//    requireField("#address", "Home address is required.");
+//    requireField("#homeCountry", "Home country is required.");
+//    requireField("#homeCity", "Home city is required.");
+
+//    // Mobile optional in DB, lekin usually form level pe chahiye:
+//    if (!v("#mobileNumber")) {
+//        showFieldError("#mobileNumber", "Mobile number is required.");
+//        isValid = false;
+//    }
+
+//    // EmailAddress [Required]
+//    if (!v("#emaiaddress")) {
+//        showFieldError("#emaiaddress", "Email address is required.");
+//        isValid = false;
+//    } else {
+//        const email = v("#emaiaddress");
+//        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//        if (!emailRegex.test(email)) {
+//            showFieldError("#emaiaddress", "Please enter a valid email address.");
+//            isValid = false;
+//        }
+//    }
+
+//    // ===== EMPLOYMENT & LOGIN (C# [Required]) =====
+//    // EmploymentStatus
+//    requireField("#empStatus", "Employment status is required.");
+
+//    // Passwords (Password [Required] in model)
+//    if (!v("#password") || !v("#cnfrmpassword")) {
+//        showFieldError("#password", "Password and Confirm Password are required.");
+//        showFieldError("#cnfrmpassword", "Password and Confirm Password are required.");
+//        isValid = false;
+//    } else if (v("#password") !== v("#cnfrmpassword")) {
+//        showFieldError("#cnfrmpassword", "Passwords do not match.");
+//        isValid = false;
+//    }
+
+//    // ===== CURRENT EMPLOYER (Required in model) =====
+//    requireField("#industry", "Current industry is required.");
+//    requireField("#ORG", "Current organization is required.");
+//    requireField("#EmployerAddress", "Employer address is required.");
+
+//    // EmployerCountry / EmployerCity optional in model but recommended:
+//    if (!v("#empCountry")) {
+//        showFieldError("#empCountry", "Employer country is required.");
+//        isValid = false;
+//    }
+//    if (!v("#empCity")) {
+//        showFieldError("#empCity", "Employer city is required.");
+//        isValid = false;
+//    }
+
+//    // ===== CROWE HISTORY (Required in model) =====
+//    requireField("#lastposition", "Last position held is required.");
+//    requireField("#department", "Department is required.");
+//    requireField("#historycity", "Crowe city/location is required.");
+//    requireField("#leavingdate", "Leaving date is required.");
+//    requireField("#Joiningdate", "Joining date is required.");
+//    requireField("#staffcode", "Staff Code is required.");
+//    requireField("#question", "Secrect question is required.");
+//    requireField("#answer", "Secrect question's answer is required.");
+//    requireField("#BG", "Blood Group is required.");
+//    requireField("#JobTitle", "Job Title is required.");
+
+//    // LeavingDate >= JoiningDate (if JoiningDate given)
+//    if (v("#Joiningdate") && v("#leavingdate")) {
+//        const join = new Date(v("#Joiningdate"));
+//        const leave = new Date(v("#leavingdate"));
+//        if (leave < join) {
+//            showFieldError("#leavingdate", "Leaving date cannot be before joining date.");
+//            isValid = false;
+//        }
+//    }
+
+//    if (!requireFile("#profilepic", "Profile picture is required.")) {
+//        isValid = false;
+//    }
+
+//    function requireFile(selector, message) {
+//        const $field = $(selector);
+//        const el = $field[0];
+
+//        if (!el || !el.files || el.files.length === 0) {
+//            showFieldError(selector, message);
+//            return false;
+//        }
+//        return true;
+//    }
+
+
+//    // ===== Privacy Consent (AgreePrivacy [Required]) =====
+//    if (!$("#agreePrivacy").is(":checked")) {
+//        showFieldError("#agreePrivacy", "You must agree to the privacy statement.");
+//        isValid = false;
+//    }
+
+//    return isValid;
+//}*/
+
 function bindProfilePicLabel() {
     $("#profilepic").on("change", function () {
         const fileName = this.files && this.files.length ? this.files[0].name : "Add Picture";
@@ -644,12 +758,6 @@ function bindFormSubmit() {
         fd.append("City", v("#homeCity"));
         fd.append("MobileNumber", v("#mobileNumber"));
         fd.append("EmailAddress", v("#emaiaddress"));
-        fd.append("LandLine1", v("#landLine1"));
-        fd.append("LandLine2", v("#landLine2"));
-
-        // 🔧 yahan bug tha: #faxNumber id exist nahi karti
-        // personal fax:
-        fd.append("FaxNumber", v("#personalfaxNumber"));
         fd.append("LinkedIn", v("#LinkedIn"));
 
         // Employment & login
@@ -660,7 +768,19 @@ function bindFormSubmit() {
         fd.append("SecretAnswer", v("#answer"));
 
         // Current employer
-        fd.append("Industry", v("#industry"));
+        const st = (v("#empStatus") || "").toLowerCase();
+        const needEmployer = !(st === "unemployed" || st === "retired");
+
+        if (needEmployer) {
+            fd.append("Industry", v("#industry"));
+            fd.append("EmployerOrganization", v("#ORG"));
+            fd.append("JobTitle", v("#JobTitle"));
+            fd.append("EmployerCountry", v("#empCountry"));
+            fd.append("EmployerCity", v("#empCity"));
+            fd.append("EmployerAddress", v("#EmployerAddress"));
+        }
+
+        /*fd.append("Industry", v("#industry"));
         fd.append("EmployerOrganization", v("#ORG"));
         fd.append("JobTitle", v("#JobTitle"));
         fd.append("EmployerCountry", v("#empCountry"));
@@ -670,7 +790,7 @@ function bindFormSubmit() {
         // official fax
         fd.append("EmployerFaxNumber", v("#officialfaxNumber"));
         fd.append("EmployerAddress", v("#EmployerAddress"));
-
+*/
         // Crowe history
         fd.append("StaffCode", v("#staffcode"));
         fd.append("LastPosition", v("#lastposition"));
@@ -705,6 +825,67 @@ function bindFormSubmit() {
         });
     });
 }
+function toggleCurrentEmployerByStatus() {
+    const st = (v("#empStatus") || "").toLowerCase();
+
+    const shouldShow = !(st === "unemployed" || st === "retired");
+    // Practicing / Employed / Business => show
+
+    const $sec = $("#currentEmployerSection");
+    $sec.toggle(shouldShow);
+
+    // Disable/enable inputs so validation + formdata clean rahe
+    const $fields = $sec.find("input, select, textarea");
+
+    if (!shouldShow) {
+        // clear + disable
+        $fields.each(function () {
+            const $el = $(this);
+            $el.prop("disabled", true);
+            if ($el.is("select")) $el.val("");
+            else $el.val("");
+            $el.removeClass("is-invalid");
+        });
+
+        // org-add UI hide/reset
+        $("#orgAddBox").removeClass("show").hide();
+        $("#errorPopup").hide().text("");
+        $("#newORGInput").val("");
+
+        // cities dropdown reset
+        $("#empCity").empty().append(new Option("Select City", "", true, false)).prop("disabled", true);
+        $("#empCountry").val("");
+    } else {
+        // enable
+        $fields.prop("disabled", false);
+
+    }
+}
+//function toggleCurrentEmployerSection() {
+//    const status = (v("#empStatus") || "").toLowerCase();
+//    const isUnemployed = status === "unemployed"; 
+
+//    const $sec = $("#currentEmployerSection");
+//    const $fields = $sec.find("input, select, textarea");
+
+//    if (isUnemployed) {
+//        // hide
+//        $sec.addClass("d-none");
+
+//        // disable + clear so they won't be posted
+//        $fields.prop("disabled", true).val("");
+
+//        // clear org custom UI if open
+//        $("#orgAddBox").removeClass("show").hide();
+//        $("#errorPopup").hide().text("");
+//    } else {
+//        // show
+//        $sec.removeClass("d-none");
+
+//        // enable back
+//        $fields.prop("disabled", false);
+//    }
+//}
 
 $(function () {
     const $bg = $("#BG");
@@ -734,5 +915,9 @@ $(function () {
     populateQualifications();
     bindQualificationCustomAdd();
     bindFormSubmit();
+    toggleCurrentEmployerByStatus();
+    $("#empStatus").off("change.emp").on("change.emp", function () {
+        toggleCurrentEmployerByStatus();
+    });
 });
 

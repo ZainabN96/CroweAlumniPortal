@@ -14,6 +14,8 @@ namespace CroweAlumniPortal.Data.IServices
         Task<User?> GetByEmailAsync(string email);
         Task<int> CountAsync(UserApprovalStatus? status = null);
         Task<PagedResult<PendingUserRow>> GetUsersByStatusAsync(UserApprovalStatus status, int page, int pageSize);
+        Task<List<string>> GetApprovedUserEmailsAsync();
+        Task<IEnumerable<User>> ListAllAsync();
     }
     public sealed class PagedResult<T>
     {

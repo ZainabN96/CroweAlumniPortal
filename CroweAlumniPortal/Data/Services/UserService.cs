@@ -39,7 +39,7 @@ namespace CroweAlumniPortal.Data.Services
         private async Task<string> GenerateOrgYearCounterLoginIdAsync(User user)
         {
             var prefix = GetOrgPrefix(user.OrganizationType);
-            var yy = user.JoiningDate?.Year.ToString() ?? DateTime.UtcNow.Year.ToString();
+            var yy = user.JoiningDate.Year.ToString() ?? DateTime.UtcNow.Year.ToString();
             var basePrefix = $"{prefix}-{yy}-"; 
 
             var last = await dc.Users
@@ -86,7 +86,7 @@ namespace CroweAlumniPortal.Data.Services
             }
             else
             {
-                var joinYear = user.JoiningDate?.Year.ToString() ?? DateTime.UtcNow.Year.ToString();
+                var joinYear = user.JoiningDate.Year.ToString() ?? DateTime.UtcNow.Year.ToString();
 
                 var basePrefix = $"ADM-{joinYear}-"; 
 
@@ -176,6 +176,23 @@ namespace CroweAlumniPortal.Data.Services
             if (status.HasValue)
                 q = q.Where(u => u.ApprovalStatus == status.Value && u.UserType == "Alumni");
             return q.CountAsync();
+        }
+        public async Task<List<string>> GetApprovedUserEmailsAsync()
+        {
+            return await dc.Users
+                .Where(u => u.IsActive
+                    && u.ApprovalStatus == UserApprovalStatus.Approved
+                    && u.EmailAddress != null && u.EmailAddress != "")
+                .Select(u => u.EmailAddress)
+                .Distinct()
+                .ToListAsync();
+        }
+       
+        public async Task<IEnumerable<User>> ListAllAsync()
+        {
+            return await dc.Users.Where(x => x.IsActive == true)
+                                       .OrderBy(x => x.FirstName)
+                                       .ToListAsync();
         }
     }
 }

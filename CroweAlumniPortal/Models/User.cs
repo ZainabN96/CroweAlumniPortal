@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using CroweAlumniPortal;
 
 namespace CroweAlumniPortal.Models
 {
@@ -8,8 +7,7 @@ namespace CroweAlumniPortal.Models
         // Profile
         [Required]
         public string Title { get; set; }
-
-        public string ProfilePicturePath { get; set; }
+        public string? ProfilePicturePath { get; set; }
 
         [Required]
         public string FirstName { get; set; }
@@ -22,8 +20,6 @@ namespace CroweAlumniPortal.Models
         [Required]
         [StringLength(13, MinimumLength = 13, ErrorMessage = "CNIC must be 13 digits without dashes")]
         public string CNIC { get; set; }
-
-        [Required]
         public string? MemberStatus { get; set; }
 
         [Required]
@@ -34,8 +30,7 @@ namespace CroweAlumniPortal.Models
         // Home Address
         [Required]
         public string Address { get; set; }
-
-        public string ZIP { get; set; }
+        public string? ZIP { get; set; }
 
         public string Country { get; set; }
 
@@ -58,7 +53,7 @@ namespace CroweAlumniPortal.Models
         [Required]
         public string UserType { get; set; } // "Admin" or "Alumni"
 
-        public string OrganizationType { get; set; } // Crowe, HCC, HTF
+        public string? OrganizationType { get; set; } // Crowe, HCC, HTF
 
         // Login Details
         [Required]
@@ -70,43 +65,33 @@ namespace CroweAlumniPortal.Models
         [Required]
         public string Password { get; set; }
 
-        public string Question { get; set; }
+        public string? Question { get; set; }
 
-        public string SecretAnswer { get; set; }
+        public string? SecretAnswer { get; set; }
 
         // Current Employer
-        [Required]
         public string? Industry { get; set; }
-
-        [Required]
         public string? EmployerOrganization { get; set; }
-
-        public string JobTitle { get; set; }
-
+        public string? JobTitle { get; set; }
         public string? EmployerCountry { get; set; }
-
         public string? EmployerCity { get; set; }
-
         public string? EmployerLandline1 { get; set; }
-
         public string? EmployerFaxNumber { get; set; }
-
-        [Required]
         public string? EmployerAddress { get; set; }
 
         // Crowe History
-        public string StaffCode { get; set; }
+        public string? StaffCode { get; set; }
 
         [Required]
-        public string LastPosition { get; set; }
+        public string? LastPosition { get; set; }
 
         [Required]
-        public string Department { get; set; }
+        public string? Department { get; set; }
 
         [Required]
-        public string HistoryCity { get; set; }
-
-        public DateTime? JoiningDate { get; set; }
+        public string? HistoryCity { get; set; }
+        [Required]
+        public DateTime JoiningDate { get; set; }
 
         [Required]
         public DateTime LeavingDate { get; set; }

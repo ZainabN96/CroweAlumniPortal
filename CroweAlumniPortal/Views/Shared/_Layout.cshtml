@@ -86,6 +86,7 @@
     @RenderBody()
     <!-- ======= Footer ======= -->
     <footer id="footer" class="footer">
+        <hr />
         <div class="copyright">
             &copy; Powered by <strong><span> 2025 Crowe Global</span></strong>.
         </div>
@@ -155,28 +156,47 @@
             badge.innerText = notifCount;
           }
         }
-
         function timeAgo(iso) {
-          // Force treat timestamp as UTC
-          const then = new Date(iso + "Z"); // 👈 add Z = UTC marker if missing
-          const now = new Date();
+            //debugger;
+            if (!iso) return "";
+            const s = String(iso);
+            const then = new Date(s.endsWith("Z") || s.includes("+") ? s : s + "Z");
+            if (isNaN(then)) return "";
 
-          // Difference in seconds
-          const diff = (now.getTime() - then.getTime()) / 1000;
+            const now = new Date();
+            const diff = (now - then) / 1000;
 
-          if (diff < 60) return "Just now";
-
-          const m = Math.floor(diff / 60);
-          if (m < 60) return `${m} min ago`;
-
-          const h = Math.floor(m / 60);
-          if (h < 24) return `${h} h ago`;
-
-          const d = Math.floor(h / 24);
-          if (d < 7) return `${d} d ago`;
-
-          return then.toLocaleDateString();
+            if (diff < 60) return "Just now";
+            const m = Math.floor(diff / 60);
+            if (m < 60) return `${m} min ago`;
+            const h = Math.floor(m / 60);
+            if (h < 24) return `${h} h ago`;
+            const d = Math.floor(h / 24);
+            if (d < 7) return `${d} d ago`;
+            return then.toLocaleDateString();
         }
+
+        // function timeAgo(iso) {
+        //   Force treat timestamp as UTC
+        //   const then = new Date(iso + "Z"); 👈 add Z = UTC marker if missing
+        //   const now = new Date();
+
+        //   Difference in seconds
+        //   const diff = (now.getTime() - then.getTime()) / 1000;
+
+        //   if (diff < 60) return "Just now";
+
+        //   const m = Math.floor(diff / 60);
+        //   if (m < 60) return `${m} min ago`;
+
+        //   const h = Math.floor(m / 60);
+        //   if (h < 24) return `${h} h ago`;
+
+        //   const d = Math.floor(h / 24);
+        //   if (d < 7) return `${d} d ago`;
+
+        //   return then.toLocaleDateString();
+        // }
 
         function renderNotif(n) {
           return `

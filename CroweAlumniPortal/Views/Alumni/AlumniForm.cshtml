@@ -226,49 +226,27 @@
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="landLine1" class="alum-label">LandLine1</label>
-                                <input type="text" class="form-control" id="landLine1" name="landline1">
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="landLine2" class="alum-label">LandLine2</label>
-                                <input type="text" class="form-control" id="landLine2" name="LandLine2">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="faxNumber" class="alum-label">Fax Number</label>
-                                <input type="text" class="form-control" id="personalfaxNumber" name="FaxNumber">
-                            </div>
-                        </div>
+                       
                         <div class="col-md-6 mb-3">
                             <div class="form-group">
                                 <label for="LinkedIn" class="alum-label">LinkedIn</label>
                                 <input type="text" class="form-control" id="LinkedIn" name="LinkedIn">
                             </div>
                         </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6 mb-3">
-                                <div class="form-group">
-                                    <label for="empStatus" class="alum-label">Employment Status*</label>
-                                    <select class="form-select" id="empStatus" name="empstatus" required>
-                                        <option value="" disabled selected hidden>Select</option>
-                                        <option value="Employed">Employed</option>
-                                        <option value="Practicing">Practicing</option>
-                                        <option value="Retired">Retired</option>
-                                        <option value="Business">Business</option>
-                                        <option value="UnEmployed">UnEmployed</option>
-                                    </select>
-                                </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="empStatus" class="alum-label">Employment Status*</label>
+                                <select class="form-select" id="empStatus" name="empstatus" required>
+                                    <option value="" disabled selected hidden>Select</option>
+                                    <option value="Employed">Employed</option>
+                                    <option value="Practicing">Practicing</option>
+                                    <option value="Retired">Retired</option>
+                                    <option value="Business">Business</option>
+                                    <option value="UnEmployed">UnEmployed</option>
+                                </select>
                             </div>
                         </div>
+                      
                     </div>
 
                     <!-- Login Details -->
@@ -308,98 +286,89 @@
                             </div>
                         </div>
                     </div>
+                    <div id="currentEmployerSection">
+                        <!-- Current Employer -->
+                        <div class="col-md-3 mb-2"><span class="badge-services">Current Employer</span></div>
 
-                    <!-- Current Employer -->
-                    <div class="col-md-3 mb-2"><span class="badge-services">Current Employer</span></div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="industry" class="alum-label">Current Industry*</label>
-                                <select class="form-select" id="industry" name="industry" required>
-                                    <option value="" disabled selected hidden>Select</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="ORG" class="alum-label">Current Organization*</label>
-                                <select class="form-select" id="ORG" name="ORG" required>
-                                    <option value="" disabled selected hidden>Select Organization</option>
-                                </select>
-
-                                <div id="orgAddTrigger" class="click-to-add alum-label">Click to add your organization</div>
-
-                                <div id="orgAddBox" class="org-add-box">
-                                    <input type="text" id="newORGInput" placeholder="Type your organization name" />
-                                    <button type="button" id="addOrgBtn">Add</button>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="industry" class="alum-label">Current Industry*</label>
+                                    <select class="form-select" id="industry" name="industry" required>
+                                        <option value="" disabled selected hidden>Select</option>
+                                    </select>
                                 </div>
+                            </div>
 
-                                <div id="errorPopup" class="error-popup"></div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="ORG" class="alum-label">Current Organization*</label>
+                                    <select class="form-select" id="ORG" name="ORG" required>
+                                        <option value="" disabled selected hidden>Select Organization</option>
+                                    </select>
+
+                                    <div id="orgAddTrigger" class="click-to-add alum-label">Click to add your organization</div>
+
+                                    <div id="orgAddBox" class="org-add-box">
+                                        <input type="text" id="newORGInput" placeholder="Type your organization name" />
+                                        <button type="button" id="addOrgBtn">Add</button>
+                                    </div>
+
+                                    <div id="errorPopup" class="error-popup"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="JobTitle" class="alum-label">Job Title*</label>
+                                    <input type="text" class="form-control" id="JobTitle" name="JobTitle" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="workEmail" class="alum-label">Work Email (optional)</label>
+                                    <input type="email" class="form-control" id="workEmail" name="WorkEmail" autocomplete="email">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="empCountry" class="alum-label">Country*</label>
+                                    <select class="form-select" id="empCountry" name="empCountry" required>
+                                        <option value="" disabled selected hidden>Select</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="empCity" class="alum-label">City*</label>
+                                    <select class="form-select" id="empCity" name="empCity" required>
+                                        <option value="" disabled selected hidden>Select</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>                                                                                                                       
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-12 mb-3">
+                                <div class="form-group">
+                                    <label for="EmployerAddress" class="alum-label">Address*</label>
+                                    <input type="text" class="form-control" id="EmployerAddress" name="empraddress" required>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="JobTitle" class="alum-label">Job Title*</label>
-                                <input type="text" class="form-control" id="JobTitle" name="JobTitle" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="workEmail" class="alum-label">Work Email (optional)</label>
-                                <input type="email" class="form-control" id="workEmail" name="WorkEmail" autocomplete="email">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="empCountry" class="alum-label">Country*</label>
-                                <select class="form-select" id="empCountry" name="empCountry" required>
-                                    <option value="" disabled selected hidden>Select</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="empCity" class="alum-label">City*</label>
-                                <select class="form-select" id="empCity" name="empCity" required>
-                                    <option value="" disabled selected hidden>Select</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="faxNumber" class="alum-label">Fax Number</label>
-                                <input type="text" class="form-control" id="officialfaxNumber" name="FaxNumber">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label for="EmployerAddress" class="alum-label">Address*</label>
-                                <input type="text" class="form-control" id="EmployerAddress" name="empraddress" required>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Crowe History -->
                     <div class="col-md-3 mb-2"><span class="badge-services">Crowe History</span></div>
 
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
                             <div class="form-group">
-                                <label for="staffcode" class="alum-label">Staff Code/Registration Number*</label>
+                                <label for="staffcode" class="alum-label">Staff Code/CRN Number*</label>
                                 <input type="text" class="form-control" id="staffcode" name="staffcode" required>
                             </div>
                         </div>
@@ -417,14 +386,16 @@
                                 <label for="department" class="alum-label">Department*</label>
                                 <select class="form-select" id="department" name="department" required>
                                     <option value="" disabled selected hidden>Select</option>
-                                    <option value="Audit">Audit</option>
-                                    <option value="CorporateAdvisory">Corporate Advisory</option>
-                                    <option value="FinancialAdvisory">Financial Advisory</option>
+                                    <option value="Audit & Assurance">Audit & Assurance</option>
+                                    <option value="Corporate Advisory">Corporate Advisory</option>
+                                    <option value="Financial Advisory">Financial Advisory</option>
                                     <option value="Finance">Finance</option>
                                     <option value="HR&Admin">HR & Admin</option>
                                     <option value="IT">Information Technology (IT)</option>
-                                    <option value="RiskAdvisory">Risk Advisory</option>
+                                    <option value="Risk Advisory">Risk Advisory</option>
                                     <option value="Tax">Tax</option>
+                                    <option value="ESG">ESG</option>
+                                    <option value="ERP">ERP</option>
                                 </select>
                             </div>
                         </div>

@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Xml.Linq;
 using CroweAlumniPortal.Data.IServices;
+using CroweAlumniPortal.Dtos;
 using CroweAlumniPortal.Helper;
 using CroweAlumniPortal.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +18,15 @@ namespace CroweAlumniPortal.Controllers.api
         private readonly INotificationService notificationService;
         private readonly IFileService fileService;
         private readonly IHubContext<ChatHub> hub;
-        public ChatController(IChatService chat, IUnitOfWork uow, IFileService fileService, INotificationService notificationService, IHubContext<ChatHub> hub)
+        private readonly IMailService mailService ;
+        public ChatController(IChatService chat, IUnitOfWork uow, IFileService fileService, INotificationService notificationService, IHubContext<ChatHub> hub, IMailService mailService)
         {
-            this.chat = chat; 
+            this.chat = chat;
             this.uow = uow;
             this.fileService = fileService;
             this.notificationService = notificationService;
             this.hub = hub;
+            this.mailService = mailService;
         }
 
         [HttpPost("start/{otherId:int}")]
@@ -101,6 +104,10 @@ namespace CroweAlumniPortal.Controllers.api
 
             var meUser = await uow.UserService.Get(myId);
             var meName = $"{meUser?.FirstName} {meUser?.LastName}".Trim();
+            var inboxLink = $"{Request.Scheme}://{Request.Host}/Message/Inbox?c={conversationId}";
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var convoUrl = $"{baseUrl}/Message/Inbox?c={conversationId}";
+            var preview = string.IsNullOrWhiteSpace(body) ? "Sent an attachment" : body;
             if (memberIds.Count > 0)
             {
                 await notificationService.CreateAsync(
@@ -113,6 +120,22 @@ namespace CroweAlumniPortal.Controllers.api
                     },
                     memberIds
                 );
+                foreach(var id in memberIds)
+                {
+                    var receivers = await uow.UserService.Get(id); // implement if not present
+                    
+                        if (string.IsNullOrWhiteSpace(receivers?.EmailAddress)) continue;
+
+                        var receiverName = $"{receivers.FirstName} {receivers.LastName}".Trim();
+                        var subject = EmailTemplates.NewMessageSubject(meName);
+                        var html = EmailTemplates.NewMessageBody(receiverName, meName, preview, convoUrl);
+
+                       // await mailService.SendEmailAsync(receivers.EmailAddress, subject, html);
+                        await mailService.SendEmailAsync(new MailRequestDto { ToEmail = receivers.EmailAddress, Subject = subject, Body = html });
+
+
+                }
+                
             }
             return Ok(new { msg.Id });
         }

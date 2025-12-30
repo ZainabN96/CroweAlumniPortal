@@ -4,6 +4,8 @@ using CroweAlumniPortal.Data.Services;
 using CroweAlumniPortal.Dtos;
 using CroweAlumniPortal.Errors;
 using CroweAlumniPortal.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -62,7 +64,11 @@ namespace CroweAlumniPortal.Controllers.api
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
-            return Ok("Logged out successfully.");
+            HttpContext.Session.Clear();
+            Response.Cookies.Delete(".AspNetCore.Cookies");
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            return Ok(new { message = "Logged out successfully." });
         }
         
         [HttpPost("register")]
