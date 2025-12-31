@@ -122,13 +122,24 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
         const userType = sessionStorage.getItem("userType");
-            if (userType === "Admin") {
+        if (userType === "Admin") {
             const navList = document.getElementById("navList");
-            const li = document.createElement("li");
-            li.className = "nav-item";
-            li.innerHTML = `<a class="nav-link" href="/Alumni/RegistrationRequest">Registration Request</a>`;
-            navList.appendChild(li);
+            const li1 = document.createElement("li");
+            li1.className = "nav-item";
+            li1.innerHTML = `<a class="nav-link" href="/Alumni/RegistrationRequest">Registration Request</a>`;
+            navList.appendChild(li1);
+            const li2 = document.createElement("li");
+            li2.className = "nav-item";
+            li2.innerHTML = `<a class="nav-link" href="/AlumniReport/Index">Alumni Report</a>`;
+            navList.appendChild(li2);
         }
+        // if (userType === "Admin") {
+        //     const navList = document.getElementById("navList");
+        //     const li = document.createElement("li");
+        //     li.className = "nav-item";
+        //     li.innerHTML = `<a class="nav-link" href="/Alumni/RegistrationRequest">Registration Request</a>`;
+        //     navList.appendChild(li);
+        // }
         // --- one source of truth ---
         let notifCount = 0;
 

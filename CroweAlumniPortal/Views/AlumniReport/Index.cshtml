@@ -1,0 +1,494 @@
+﻿@{
+    ViewData["Title"] = "Alumni Report";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Alumni Report</h3>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-success btn-sm" id="btnExcel">
+                <i class="bi bi-file-earmark-excel"></i> Excel
+            </button>
+            <button class="btn btn-outline-danger btn-sm" id="btnPdf">
+                <i class="bi bi-file-earmark-pdf"></i> PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters (Find Alumni style) -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Country</label>
+                    <select id="fCountry" class="form-select form-select-sm">
+                        <option value="all">All countries</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">City</label>
+                    <select id="fCity" class="form-select form-select-sm">
+                        <option value="all">All cities</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Industry</label>
+                    <select id="fIndustry" class="form-select form-select-sm">
+                        <option value="all">All industries</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Joining Year</label>
+                    <select id="fJoinYear" class="form-select form-select-sm">
+                        <option value="">All</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Leaving Year</label>
+                    <select id="fLeaveYear" class="form-select form-select-sm">
+                        <option value="">All</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label small text-muted mb-1">Search</label>
+                    <div class="input-group input-group-sm">
+                        <input id="fSearch" class="form-control" placeholder="Name, email, organization, job..." />
+                        <button class="btn btn-primary" id="btnApply"><i class="bi bi-search"></i></button>
+                    </div>
+                </div>
+
+                <div class="col-md-3 text-end">
+                    <button class="btn btn-outline-secondary btn-sm" id="btnReset">
+                        <i class="bi bi-arrow-clockwise"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="reportTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:60px;">Sr</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>City</th>
+                        <th>Country</th>
+                        <th>Industry</th>
+                        <th>Organization</th>
+                        <th>Job</th>
+                        <th style="width:70px;">View</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="9" class="text-center py-4">Loading…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- View Details Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Alumni Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="detailBody" class="small text-muted">Loading…</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    (function(){
+        const $tb = $("#reportTable tbody");
+
+        // ---- state
+        const state = {
+            search: "",
+            country: "all",
+            city: "all",
+            industry: "all",
+            joinYear: "",
+            leaveYear: ""
+        };
+
+        function qs(){
+            const p = new URLSearchParams();
+            if(state.search) p.set("search", state.search);
+            if(state.country && state.country !== "all") p.set("country", state.country);
+            if(state.city && state.city !== "all") p.set("city", state.city);
+            if(state.industry && state.industry !== "all") p.set("industry", state.industry);
+            if(state.joinYear) p.set("joinYear", state.joinYear);
+            if(state.leaveYear) p.set("leaveYear", state.leaveYear);
+            return p.toString();
+        }
+
+        function row(x){
+            return `
+              <tr data-id="${x.id}">
+                <td>${x.sr}</td>
+                <td>${x.fullName || ""}</td>
+                <td>${x.email || ""}</td>
+                <td>${x.city || ""}</td>
+                <td>${x.country || ""}</td>
+                <td>${x.industry || ""}</td>
+                <td>${x.organization || ""}</td>
+                <td>${x.jobTitle || ""}</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary" id="btn-view" title="View">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </td>
+              </tr>`;
+        }
+
+        function setLoading(){ $tb.html(`<tr><td colspan="9" class="text-center py-4">Loading…</td></tr>`); }
+
+        function load(){
+            setLoading();
+            $.getJSON(`/api/alumnireport/list?${qs()}`)
+              .done(list => {
+                  if(!Array.isArray(list) || !list.length){
+                      $tb.html(`<tr><td colspan="9" class="text-center py-4 text-muted">No data</td></tr>`);
+                      return;
+                  }
+                  $tb.html(list.map(row).join(""));
+                  populateFilterOptions(list);
+              })
+              .fail(xhr => {
+                  $tb.html(`<tr><td colspan="9" class="text-center py-4 text-danger">Failed (${xhr.status})</td></tr>`);
+              });
+        }
+
+        // Build dropdown options like Find Alumni (from loaded data)
+        function populateFilterOptions(list){
+            // countries/cities/industry
+            const set = (arr) => Array.from(new Set(arr.filter(Boolean))).sort();
+
+            const countries = set(list.map(x => x.country));
+            const cities = set(list.map(x => x.city));
+            const inds = set(list.map(x => x.industry));
+
+            fill($("#fCountry"), countries, "All countries", state.country);
+            fill($("#fCity"), cities, "All cities", state.city);
+            fill($("#fIndustry"), inds, "All industries", state.industry);
+
+            // join/leave years
+            const jy = set(list.map(x => x.joiningDate ? new Date(x.joiningDate).getFullYear() : null));
+            const ly = set(list.map(x => x.leavingDate ? new Date(x.leavingDate).getFullYear() : null));
+
+            fillYear($("#fJoinYear"), jy, state.joinYear);
+            fillYear($("#fLeaveYear"), ly, state.leaveYear);
+        }
+
+        function fill($sel, items, allLabel, selected){
+            if($sel.data("filled")) return; // fill once (optional)
+            $sel.empty().append(new Option(allLabel, "all"));
+            items.forEach(v => $sel.append(new Option(v, v)));
+            $sel.val(selected || "all");
+            $sel.data("filled", true);
+        }
+        function fillYear($sel, years, selected){
+            if($sel.data("filled")) return;
+            $sel.empty().append(new Option("All", ""));
+            years.forEach(v => $sel.append(new Option(v, v)));
+            $sel.val(selected || "");
+            $sel.data("filled", true);
+        }
+
+        // Apply
+        $("#btnApply").on("click", function(){
+            state.search = ($("#fSearch").val() || "").trim();
+            state.country = $("#fCountry").val() || "all";
+            state.city = $("#fCity").val() || "all";
+            state.industry = $("#fIndustry").val() || "all";
+            state.joinYear = $("#fJoinYear").val() || "";
+            state.leaveYear = $("#fLeaveYear").val() || "";
+            // allow refilling next load if you want:
+            $("#fCountry,#fCity,#fIndustry,#fJoinYear,#fLeaveYear").data("filled", false);
+            load();
+        });
+
+        $("#btnReset").on("click", function(){
+            $("#fSearch").val("");
+            $("#fCountry").val("all");
+            $("#fCity").val("all");
+            $("#fIndustry").val("all");
+            $("#fJoinYear").val("");
+            $("#fLeaveYear").val("");
+            state.search=""; state.country="all"; state.city="all"; state.industry="all"; state.joinYear=""; state.leaveYear="";
+            $("#fCountry,#fCity,#fIndustry,#fJoinYear,#fLeaveYear").data("filled", false);
+            load();
+        });
+
+        // View details
+        $(document).on("click", "#btn-view", function(){
+           const id = $(this).closest("tr").data("id");
+           $("#detailBody").html("Loading…");
+
+           $.getJSON(`/api/alumnireport/${id}`)
+            .done(u => {
+
+                // helper: safe text
+                const t = (v) => (v == null || v === "" ? "—" : v);
+
+              // helper: date display (Required fields are DateTime, but still handle MinValue)
+              const fmtDate = (d) => {
+                if(!d) return "—";
+                const dt = new Date(d);
+                if (isNaN(dt.getTime())) return "—";
+                // agar DB me 0001-01-01 aa raha ho
+                if (dt.getFullYear() <= 1900) return "—";
+                return dt.toLocaleDateString();
+              };
+
+              // ✅ EmploymentStatus-based employer section
+              const status = (u.employmentStatus || "").toLowerCase();
+              const showEmployer =
+                status.includes("employ") || status.includes("work") || status.includes("self");
+
+              const employerSection = showEmployer ? `
+                <div class="card mb-2">
+                  <div class="card-header fw-bold">Current Employer</div>
+                  <div class="card-body">
+                    <div><b>Industry:</b> ${t(u.industry)}</div>
+                    <div><b>Organization:</b> ${t(u.employerOrganization)}</div>
+                    <div><b>Job Title:</b> ${t(u.jobTitle)}</div>
+                    <div><b>Employer City/Country:</b> ${t(u.employerCity)}, ${t(u.employerCountry)}</div>
+                    <div><b>Employer Address:</b> ${t(u.employerAddress)}</div>
+                    <div><b>Employer Landline:</b> ${t(u.employerLandline1)}</div>
+                    <div><b>Employer Fax:</b> ${t(u.employerFaxNumber)}</div>
+                  </div>
+                </div>
+              ` : `
+                <div class="card mb-2">
+                  <div class="card-header fw-bold">Current Employer</div>
+                  <div class="card-body text-muted">
+                    Not applicable (Employment Status: <b>${t(u.employmentStatus)}</b>)
+                  </div>
+                </div>
+              `;
+
+              // ✅ Crowe History always separate
+              const croweSection = `
+                <div class="card mb-2">
+                  <div class="card-header fw-bold">Crowe History</div>
+                  <div class="card-body">
+                    <div><b>Staff Code:</b> ${t(u.staffCode)}</div>
+                    <div><b>Last Position:</b> ${t(u.lastPosition)}</div>
+                    <div><b>Department:</b> ${t(u.department)}</div>
+                    <div><b>History City:</b> ${t(u.historyCity)}</div>
+                    <div><b>Joining Date:</b> ${fmtDate(u.joiningDate)}</div>
+                    <div><b>Leaving Date:</b> ${fmtDate(u.leavingDate)}</div>
+                  </div>
+                </div>
+              `;
+
+              // ✅ Basic Profile section
+              const profileSection = `
+                <div class="row g-3 mb-2">
+                  <div class="col-md-4">
+                    ${u.profilePicturePath ? `<img src="${u.profilePicturePath}" class="img-fluid rounded">` : ""}
+                  </div>
+                  <div class="col-md-8">
+                    <div class="fw-bold fs-5">${t(u.title)} ${t(u.firstName)} ${t(u.lastName)}</div>
+                    <div class="text-muted">${t(u.emailAddress)}</div>
+                    <div class="mt-2"><b>CNIC:</b> ${t(u.cnic)}</div>
+                    <div><b>DOB:</b> ${fmtDate(u.dob)}</div>
+                    <div><b>Phone:</b> ${t(u.mobileNumber)}</div>
+                    <div><b>Address:</b> ${t(u.address)}, ${t(u.city)}, ${t(u.country)}</div>
+                    <div><b>Qualification:</b> ${t(u.qualification)}</div>
+                    <div><b>Employment Status:</b> ${t(u.employmentStatus)}</div>
+                    <div><b>LinkedIn:</b> ${t(u.linkedIn)}</div>
+                    <div><b>Member Status:</b> ${t(u.memberStatus)}</div><br>
+                    ${croweSection}
+                    ${employerSection}
+                  </div>
+                </div>
+              `;
+
+              $("#detailBody").html(profileSection);
+              new bootstrap.Modal("#detailModal").show();
+            })
+            .fail(xhr => {
+              $("#detailBody").html(`<div class="text-danger">Failed to load details (${xhr.status})</div>`);
+              new bootstrap.Modal("#detailModal").show();
+            });
+        });
+
+        // $(document).on("click", "#btn-view", function(){
+        //     const id = $(this).closest("tr").data("id");
+        //     $("#detailBody").html("Loading…");
+        //     $.getJSON(`/api/alumnireport/${id}`)
+        //         .done(u => {
+        //             debugger;
+        //           const html = `
+        //             <div class="row g-3">
+        //               <div class="col-md-4">
+        //                 ${u.profilePicturePath ? `<img src="${u.profilePicturePath}" class="img-fluid rounded">` : ""}
+        //               </div>
+        //               <div class="col-md-8">
+        //                 <div class="fw-bold fs-5">${u.title || ""} ${(u.firstName||"")} ${(u.lastName||"")}</div>
+        //                 <div class="text-muted">${u.emailAddress || ""}</div>
+        //                 <hr/>
+
+        //                 <div class="row g-2">
+        //                   <div class="col-sm-6"><b>CNIC:</b> ${u.cnic || "—"}</div>
+        //                   <div class="col-sm-6"><b>DOB:</b> ${u.dob ? new Date(u.dob).toLocaleDateString() : "—"}</div>
+
+        //                   <div class="col-sm-6"><b>Mobile:</b> ${u.mobileNumber || "—"}</div>
+        //                   <div class="col-sm-6"><b>Qualification:</b> ${u.qualification || "—"}</div>
+
+        //                   <div class="col-sm-6"><b>Country:</b> ${u.country || "—"}</div>
+        //                   <div class="col-sm-6"><b>City:</b> ${u.city || "—"}</div>
+
+        //                   <div class="col-12"><b>Address:</b> ${u.address || "—"} ${u.zip ? `(${u.zip})` : ""}</div>
+
+        //                   <div class="col-sm-6"><b>Industry:</b> ${u.industry || "—"}</div>
+        //                   <div class="col-sm-6"><b>Organization:</b> ${u.employerOrganization || "—"}</div>
+        //                   <div class="col-sm-6"><b>Job Title:</b> ${u.jobTitle || "—"}</div>
+
+        //                   <div class="col-sm-6"><b>Joining:</b> ${u.joiningDate ? new Date(u.joiningDate).toLocaleDateString() : "—"}</div>
+        //                   <div class="col-sm-6"><b>Leaving:</b> ${u.leavingDate ? new Date(u.leavingDate).toLocaleDateString() : "—"}</div>
+
+        //                   <div class="col-sm-6"><b>Last Position:</b> ${u.lastPosition || "—"}</div>
+        //                   <div class="col-sm-6"><b>Department:</b> ${u.department || "—"}</div>
+        //                   <div class="col-sm-6"><b>History City:</b> ${u.historyCity || "—"}</div>
+
+        //                   <div class="col-sm-6"><b>Member Status:</b> ${u.memberStatus || "—"}</div>
+        //                   <div class="col-sm-6"><b>LoginId:</b> ${u.loginId || "—"}</div>
+        //                 </div>
+        //               </div>
+        //             </div>`;
+        //           $("#detailBody").html(html);
+        //         });
+
+        //       .done(u => {
+        //           const html = `
+        //             <div class="row g-3">
+        //               <div class="col-md-4">
+        //                 ${u.profilePicturePath ? `<img src="${u.profilePicturePath}" class="img-fluid rounded">` : ""}
+        //               </div>
+        //               <div class="col-md-8">
+        //                 <div class="fw-bold fs-5">${(u.firstName||"")} ${(u.lastName||"")}</div>
+        //                 <div class="text-muted">${u.emailAddress || ""}</div>
+        //                 <hr/>
+        //                 <div><b>Organization:</b> ${u.employerOrganization||"—"}</div>
+        //                 <div><b>Job:</b> ${u.jobTitle||"—"}</div>
+        //                 <div><b>Industry:</b> ${u.industry||"—"}</div>
+        //                 <div><b>City/Country:</b> ${(u.city||"—")}, ${(u.country||"—")}</div>
+        //                 <div><b>Joining/Leaving:</b> ${(u.joiningDate||"—")} → ${(u.leavingDate||"—")}</div>
+        //                 <div><b>CNIC:</b> ${u.cnic||"—"}</div>
+        //                 <div><b>Phone:</b> ${u.mobileNumber||"—"}</div>
+        //                 <div><b>Address:</b> ${u.address||"—"}</div>
+        //               </div>
+        //             </div>`;
+        //           $("#detailBody").html(html);
+        //       });
+
+        //     new bootstrap.Modal("#detailModal").show();
+        // });
+
+        // ✅ Downloads (IMPORTANT: use normal navigation so browser downloads file)
+        $("#btnExcel").on("click", function(){
+            window.location.href = `/api/alumnireport/export/excel?${qs()}`;
+        });
+        $("#btnPdf").on("click", function(){
+            window.location.href = `/api/alumnireport/export/pdf?${qs()}`;
+        });
+
+        // initial load
+        load();
+    })();
+</script>
+
+@* @{
+    ViewData["Title"] = "Alumni Report";
+}
+
+<div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 class="page-title mb-0">Alumni Report</h3>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-success" id="btnExcel">
+                <i class="bi bi-file-earmark-excel"></i> Excel
+            </button>
+            <button class="btn btn-outline-danger" id="btnPdf">
+                <i class="bi bi-file-earmark-pdf"></i> PDF
+            </button>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <input id="search" class="form-control" placeholder="Search name, email, login, city..." />
+                </div>
+                <div class="col-md-2">
+                    <input id="city" class="form-control" placeholder="City" />
+                </div>
+                <div class="col-md-2">
+                    <input id="country" class="form-control" placeholder="Country" />
+                </div>
+                <div class="col-md-2">
+                    <input id="qualification" class="form-control" placeholder="Qualification" />
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <select id="pageSize" class="form-select">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <button class="btn btn-primary" id="btnApply"><i class="bi bi-funnel"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="tbl">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:70px;">#</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Login</th>
+                            <th>Qualification</th>
+                            <th>City</th>
+                            <th>Country</th>
+                            <th>Organization</th>
+                            <th>Job</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="9" class="text-center py-4">Loading…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer d-flex align-items-center justify-content-between">
+            <div id="info" class="small text-muted">&nbsp;</div>
+            <nav><ul class="pagination mb-0" id="pager"></ul></nav>
+        </div>
+    </div>
+</div>
+
+<script src="~/assets/js/jquery-3.5.1.js"></script>
+<script src="~/assets/js/ajax/alumni report/report.js"></script> *@
