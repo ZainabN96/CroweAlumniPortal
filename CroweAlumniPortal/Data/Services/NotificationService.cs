@@ -13,7 +13,7 @@ namespace CroweAlumniPortal.Data.Services
         private readonly IHubContext<NotificationHub> hub;
         private readonly IEmailSender emailSender;
         private readonly IAdminDirectory adminDirectory;
-
+        private const string BaseUrl = "https://alumni.crowe.pk/";
         public NotificationService(ApplicationDbContext dc, IHubContext<NotificationHub> hub, IEmailSender emailSender, IAdminDirectory adminDirectory)
         {
             this.dc = dc;
@@ -103,7 +103,7 @@ namespace CroweAlumniPortal.Data.Services
                   Email: {user.EmailAddress}<br>
                   Member: {user.MemberStatus}<br>
                   Qualification: {user.Qualification}<br>
-                  Approve: https://localhost:44378/Alumni/RegistrationRequest";
+                  Approve: {BaseUrl}Alumni/RegistrationRequest";
 
             foreach (var addr in adminEmails)
                 _ = emailSender.SendAsync(addr, subject, body); 
@@ -114,7 +114,7 @@ namespace CroweAlumniPortal.Data.Services
                 Type = "info",
                 Title = "New Alumni Registration",
                 Message = $"{user.FirstName} {user.LastName} just registered and awaits approval.",
-                Url = $"/Alumni/RegistrationRequest"
+                Url = $"{BaseUrl}Alumni/RegistrationRequest"
             };
             await CreateAsync(notif, adminIds);
 
@@ -153,7 +153,7 @@ namespace CroweAlumniPortal.Data.Services
                 Type = "post-deleted",
                 Title = "Your post was removed by admin",
                 Message = $"Your post \"{post?.Title ?? "Untitled"}\" has been removed by {adminName}.",
-                Url = $"/Posts/Details/{post?.Id}",
+                Url = $"{BaseUrl}Posts/Details/{post?.Id}",
                 IsGlobal = false,
                 CreatedBy = admin,
                 CreatedOn = DateTime.UtcNow
