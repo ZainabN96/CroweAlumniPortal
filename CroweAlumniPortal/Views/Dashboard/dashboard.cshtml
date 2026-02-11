@@ -84,6 +84,7 @@
                         <textarea id="postText" placeholder="Write your thought..." class="crw-textarea-desc"></textarea>
                         <small id="postTextErr" class="text-danger d-none"></small>
 
+                        @* <input type="file" id="postImage" accept="image/*,video/*" multiple hidden /> *@
                         <input type="file" id="postImage" accept="image/*,video/*" hidden />
                         <small id="postMediaErr" class="text-danger d-none"></small>
 
@@ -185,6 +186,21 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="likesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Liked by</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="likesBody">
+                <div class="text-muted small">Loading…</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script src="~/assets/js/ajax/event/createevent.js"></script>

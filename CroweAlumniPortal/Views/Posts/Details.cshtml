@@ -86,7 +86,9 @@
                 <button id="btnLike" class="btn btn-sm btn-outline-primary" data-liked="0">
                     <i class="bi bi-hand-thumbs-up"></i> Like
                 </button>
-                <span id="likeCount" class="text-muted small">0 likes</span>
+                @* <span id="likeCount" class="text-muted small">0 likes</span> *@
+                <a href="#" id="likeCount" class="text-muted small text-decoration-none">0 likes</a>
+
             </div>
             
             <div class="d-flex gap-2">
@@ -101,6 +103,21 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="likesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Liked by</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="likesBody">
+                <div class="text-muted small">Loading…</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="~/assets/js/jquery-3.5.1.js"></script>
     <script>
@@ -173,38 +190,58 @@
         }
 
         $(function(){
-          // initial
-          refreshLikeState();
-          loadComments();
+            // initial
+              refreshLikeState();
+              loadComments();
 
-          // like toggle
-          $("#btnLike").on("click", function(){
-            $.post(`/api/posts/${postId}/like/toggle`)
-              .done(()=> refreshLikeState())
-              .fail(xhr => alert(xhr.responseText || "Failed to like."));
-          });
+              // like toggle
+              $("#btnLike").on("click", function(){
+                $.post(`/api/posts/${postId}/like/toggle`)
+                  .done(()=> refreshLikeState())
+                  .fail(xhr => alert(xhr.responseText || "Failed to like."));
+              });
 
-          // add comment
-          $("#btnAddComment").on("click", function(){
-            const text = ($("#newComment").val() || "").trim();
-            if(!text) return;
-            $.ajax({
-              url: `/api/posts/${postId}/comment`,
-              method: "POST",
-              contentType: "application/json",
-              data: JSON.stringify({ body: text })
-            })
-            .done(res => {
-              const html = renderComment(res);
-              const $wrap = $("#commentsWrap");
-              if ($wrap.find(".text-muted.small").length) $wrap.empty();
-              $wrap.append(html);
-              $("#newComment").val("");
-            })
-            .fail(xhr => alert(xhr.responseText || "Failed to add comment."));
-          });
+              // add comment
+              $("#btnAddComment").on("click", function(){
+                const text = ($("#newComment").val() || "").trim();
+                if(!text) return;
+                $.ajax({
+                  url: `/api/posts/${postId}/comment`,
+                  method: "POST",
+                  contentType: "application/json",
+                  data: JSON.stringify({ body: text })
+                })
+                .done(res => {
+                  const html = renderComment(res);
+                  const $wrap = $("#commentsWrap");
+                  if ($wrap.find(".text-muted.small").length) $wrap.empty();
+                  $wrap.append(html);
+                  $("#newComment").val("");
+                })
+                .fail(xhr => alert(xhr.responseText || "Failed to add comment."));
+              });
+          // open likes list
+            $("#likeCount").on("click", function (e) {
+              e.preventDefault();
+
+              $("#likesBody").html(`<div class="text-muted small">Loading…</div>`);
+              const modal = new bootstrap.Modal(document.getElementById("likesModal"));
+              modal.show();
+
+              $.get(`/api/posts/${postId}/likes`)
+                .done(list => {
+                  if (!Array.isArray(list) || list.length === 0) {
+                    $("#likesBody").html(`<div class="text-muted small">No likes yet.</div>`);
+                    return;
+                  }
+                  $("#likesBody").html(list.map(likerRow).join(""));
+                })
+                .fail(() => {
+                  $("#likesBody").html(`<div class="text-danger small">Failed to load likes.</div>`);
+                });
+            });
         });
-           $(document).on("click", ".btn-soft-delete", function (e) {
+        $(document).on("click", ".btn-soft-delete", function (e) {
           e.preventDefault();
           const postId = $(this).data("id");
           if (!postId) return;
@@ -219,5 +256,25 @@
               alert(xhr.responseText || "Could not delete post.");
             });
         });
+        function likerRow(u) {
+          const name = `${u.firstName || ""} ${u.lastName || ""}`.trim() || "Unknown";
+          const hasPic = !!u.profilePicturePath;
+
+          const av = hasPic
+            ? `<img src="${u.profilePicturePath}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">`
+            : `<div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
+                 style="width:32px;height:32px;font-size:12px;font-weight:600;">
+                 ${initialsFromName(name)}
+               </div>`;
+
+          return `
+            <div class="d-flex align-items-center gap-2 py-2">
+              ${av}
+              <div>
+                <div class="fw-semibold">${name}</div>
+              </div>
+            </div>`;
+        }
+
     </script>
 }

@@ -1,6 +1,7 @@
 ﻿using CroweAlumniPortal.Data.IServices;
 using CroweAlumniPortal.Dtos;
 using CroweAlumniPortal.Models;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 
 namespace CroweAlumniPortal.Data.Services
@@ -230,5 +231,35 @@ namespace CroweAlumniPortal.Data.Services
             p.DeletedBy = null;
             await dc.SaveChangesAsync();
         }
+
+        public async Task<List<User>> GetLikersAsync(int postId)
+        {
+            return await dc.PostLikes
+                .AsNoTracking()
+                .Where(l => l.PostId == postId && l.IsActive)
+                .Join(dc.Users.AsNoTracking(),
+                      l => l.UserId,
+                      u => u.Id,
+                      (l, u) => u)
+                .OrderBy(u => u.FirstName)
+                .ThenBy(u => u.LastName)
+                .ToListAsync();
+        }
+       /* public async Task AddMediaAsync(int postId, string path, string type, int userId)
+        {
+            var m = new PostMedia
+            {
+                PostId = postId,
+                MediaPath = path,
+                MediaType = type,
+                IsActive = true,
+                CreatedBy = userId,
+                CreatedOn = DateTime.UtcNow
+            };
+
+            dc.postMedias.Add(m);
+            await dc.SaveChangesAsync();
+        }
+*/
     }
 }

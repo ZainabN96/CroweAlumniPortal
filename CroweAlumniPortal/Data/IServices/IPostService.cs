@@ -7,6 +7,7 @@ namespace CroweAlumniPortal.Data.IServices
     {
         Task<Post> CreateAsync(PostDto dto, int? createdBy);
         Task<List<Post>> GetLatestAsync(int take = 10);
+        //Task AddMediaAsync(int postId, string path, string type, int userId);
         Task LikeAsync(int postId, int userId);
         Task UnlikeAsync(int postId, int userId);
         Task<int> GetLikeCountAsync(int postId);
@@ -19,5 +20,7 @@ namespace CroweAlumniPortal.Data.IServices
         Task<Post?> GetByIdAsync(int id);
         Task SoftDeleteAsync(int id, string deletedBy);
         Task RestoreAsync(long id);
+        Task<List<User>> GetLikersAsync(int postId);
+
     }
 }

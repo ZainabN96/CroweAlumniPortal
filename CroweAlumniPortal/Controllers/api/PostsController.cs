@@ -29,6 +29,58 @@ namespace CroweAlumniPortal.Controllers.api
             this.notificationService = notificationService;
             this.mailService = mailService;
         }
+        /*[HttpPost]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Create([FromForm] PostDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var userIdStr = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrWhiteSpace(userIdStr) || !int.TryParse(userIdStr, out var userId))
+                return Unauthorized();
+
+            // ✅ Create Post first
+            var created = await uow.PostService.CreateAsync(dto, userId);
+
+            // ✅ Save multiple media
+            var savedMedia = new List<object>();
+
+            if (dto.Media != null && dto.Media.Count > 0)
+            {
+                foreach (var file in dto.Media.Where(f => f != null && f.Length > 0))
+                {
+                    var type = file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ? "image"
+                             : file.ContentType.StartsWith("video/", StringComparison.OrdinalIgnoreCase) ? "video"
+                             : "file";
+
+                    var path = await files.SaveFileAsync(file, "assets/img/uploads/posts");
+
+                    // Save in PostMedia table
+                    await uow.PostService.AddMediaAsync(created.Id, path, type, userId);
+
+                    savedMedia.Add(new { mediaPath = path, mediaType = type });
+                }
+                await uow.SaveAsync();
+            }
+
+            // Author info
+            var author = await uow.UserService.Get(userId);
+
+            return Ok(new
+            {
+                id = created.Id,
+                title = created.Title,
+                body = created.Body,
+                createdOn = created.CreatedOn,
+                author = new
+                {
+                    firstName = author?.FirstName,
+                    lastName = author?.LastName,
+                    profilePicturePath = author?.ProfilePicturePath
+                },
+                media = savedMedia // ✅ list
+            });
+        }*/
 
         [HttpPost]
         [Consumes("multipart/form-data")]
@@ -79,7 +131,7 @@ namespace CroweAlumniPortal.Controllers.api
                 .Where(u => !userId.HasValue || u.Id != userId.Value)
                 .ToList();
 
-            var postUrl = $"{BaseUrl}/Posts/Details/{created.Id}"; 
+            var postUrl = $"{BaseUrl}/Posts/Details/{created.Id}";
             foreach (var r in recipients)
             {
                 try
@@ -513,11 +565,17 @@ namespace CroweAlumniPortal.Controllers.api
                     c.Id,
                     c.Body,
                     c.CreatedOn,
-                    Author = user == null ? null : new
+                    /*Author = user == null ? null : new
                     {
                         user.FirstName,
                         user.LastName,
                         user.ProfilePicturePath
+                    }*/
+                    author = user == null ? null : new
+                    {
+                        firstName = user.FirstName,
+                        lastName = user.LastName,
+                        profilePicturePath = user.ProfilePicturePath
                     }
                 });
             }
@@ -615,5 +673,23 @@ namespace CroweAlumniPortal.Controllers.api
             var isLiked = uid.HasValue && await uow.PostService.HasUserLikedAsync(id, uid.Value);
             return Ok(new { likeCount, isLiked });
         }
+
+        [HttpGet("{postId:int}/likes")]
+        public async Task<IActionResult> GetLikes(int postId)
+        {
+            var list = await uow.PostService.GetLikersAsync(postId);
+
+            var result = list.Select(u => new
+            {
+                id = u.Id,
+                firstName = u.FirstName,
+                lastName = u.LastName,
+                profilePicturePath = u.ProfilePicturePath,
+                emailAddress = u.EmailAddress
+            });
+
+            return Ok(result);
+        }
+
     }
 }

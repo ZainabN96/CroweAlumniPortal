@@ -164,7 +164,9 @@ function renderFbPostCard(p, currentUserIsAdmin) {
           <button class="btn-comment btn btn-sm btn-outline-secondary"><i class="bi bi-chat"></i> Comment</button>
         </div>
 
-        <div class="like-count text-muted small mt-1">${p.likeCount ?? 0} ${((p.likeCount ?? 0) === 1) ? "like" : "likes"}</div>
+        <a href="#" class="like-count text-muted small mt-1 d-inline-block show-likes">
+          ${p.likeCount ?? 0} ${((p.likeCount ?? 0) === 1) ? "like" : "likes"}
+        </a>
 
         <div class="add-comment d-flex mt-1">
           <input type="text" class="form-control form-control-sm comment-input" placeholder="Write a comment..." />
@@ -444,3 +446,47 @@ function hydratePostCard($card, postId) {
             });
     });
 })();
+
+function likerRow(u) {
+    const name = `${u.firstName || ""} ${u.lastName || ""}`.trim() || "Unknown";
+    const hasPic = !!u.profilePicturePath;
+
+    const av = hasPic
+        ? `<img src="${u.profilePicturePath}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">`
+        : `<div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
+         style="width:32px;height:32px;font-size:12px;font-weight:600;">
+         ${initialsFromName(name)}
+       </div>`;
+
+    return `
+    <div class="d-flex align-items-center gap-2 py-2">
+      ${av}
+      <div>
+        <div class="fw-semibold">${name}</div>
+      </div>
+    </div>`;
+}
+
+$(document).on("click", ".show-likes", function (e) {
+    e.preventDefault();
+
+    const $card = $(this).closest(".crw-event-card");
+    const postId = $card.data("id");
+    if (!postId) return;
+
+    $("#likesBody").html(`<div class="text-muted small">Loading…</div>`);
+    const modal = new bootstrap.Modal(document.getElementById("likesModal"));
+    modal.show();
+
+    $.get(`/api/posts/${postId}/likes`)
+        .done(list => {
+            if (!Array.isArray(list) || list.length === 0) {
+                $("#likesBody").html(`<div class="text-muted small">No likes yet.</div>`);
+                return;
+            }
+            $("#likesBody").html(list.map(likerRow).join(""));
+        })
+        .fail(xhr => {
+            $("#likesBody").html(`<div class="text-danger small">Failed to load likes.</div>`);
+        });
+});
