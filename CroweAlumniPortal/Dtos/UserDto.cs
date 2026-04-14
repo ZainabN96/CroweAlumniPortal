@@ -107,5 +107,19 @@ namespace CroweAlumniPortal.Dtos
     {
         public string Url { get; set; }
     }
+    public class ForgotPasswordRequestDto
+    {
+        [Required]
+        [EmailAddress]
+        public string EmailAddress { get; set; }
+    }
+    public class ResetPasswordRequestDto
+    {
+        [Required]
+        public string Token { get; set; }
 
+        [Required]
+        [MinLength(6)]
+        public string NewPassword { get; set; }
+    }
 }

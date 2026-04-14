@@ -17,6 +17,7 @@ namespace CroweAlumniPortal.Models
         public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedOn { get; set; }
         public string? DeletedBy { get; set; }
+        //public ICollection<PostMedia> Media { get; set; } = new List<PostMedia>();
     }
     public class PostLike : AuditableEntity
     {
@@ -34,5 +35,16 @@ namespace CroweAlumniPortal.Models
         public string Body { get; set; }
         public Post Post { get; set; }
     }
+    //public class PostMedia
+    //{
+    //    public int Id { get; set; }
+    //    public int PostId { get; set; }
+    //    public string MediaPath { get; set; }
+    //    public string MediaType { get; set; } // image/video/file
+    //    public bool IsActive { get; set; } = true;
+    //    public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+    //    public int? CreatedBy { get; set; }
+    //    public Post Post { get; set; }
+    //}
 
 }

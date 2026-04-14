@@ -1,5 +1,6 @@
 ﻿using CroweAlumniPortal.Data.IServices;
 using CroweAlumniPortal.Models;
+using DocumentFormat.OpenXml.InkML;
 using Microsoft.EntityFrameworkCore;
 
 namespace CroweAlumniPortal.Data.Services
@@ -142,7 +143,7 @@ namespace CroweAlumniPortal.Data.Services
         public Task<User?> GetByEmailAsync(string email) =>
             dc.Users.FirstOrDefaultAsync(u => u.EmailAddress == email);
 
-        public async Task<IServices.PagedResult<PendingUserRow>> GetUsersByStatusAsync(UserApprovalStatus status, int page, int pageSize)
+        public async Task<PagedResult<PendingUserRow>> GetUsersByStatusAsync(UserApprovalStatus status, int page, int pageSize)
         {
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 20;
@@ -168,7 +169,7 @@ namespace CroweAlumniPortal.Data.Services
                 })
                 .ToListAsync();
 
-            return new IServices.PagedResult<PendingUserRow> { Items = items, Total = total };
+            return new PagedResult<PendingUserRow> { Items = items, Total = total };
         }
         public Task<int> CountAsync(UserApprovalStatus? status = null)
         {
@@ -193,6 +194,11 @@ namespace CroweAlumniPortal.Data.Services
             return await dc.Users.Where(x => x.IsActive == true)
                                        .OrderBy(x => x.FirstName)
                                        .ToListAsync();
+        }
+        public async Task<User> GetByResetTokenAsync(string token)
+        {
+            return await dc.Users
+                .FirstOrDefaultAsync(x => x.ResetPasswordToken == token);
         }
     }
 }

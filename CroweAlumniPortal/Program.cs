@@ -45,6 +45,7 @@ builder.Services.AddTransient<ExceptionMiddleware>(services =>
     var next = services.GetRequiredService<RequestDelegate>();
     return new ExceptionMiddleware(next, logger, env);
 });
+
 builder.Services.AddHttpClient();
 builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
@@ -83,6 +84,12 @@ app.UseStaticFiles(new StaticFileOptions
         ctx.Context.Response.Headers.Append("Expires", "0");
     }
 });
+
+app.MapControllerRoute(
+    name: "resetPassword",
+    pattern: "reset-password",
+    defaults: new { controller = "ResetPassword", action = "Index" }
+);
 
 app.MapHub<NotificationHub>("/notificationHub");
 app.MapHub<ChatHub>("/chathub");

@@ -197,7 +197,6 @@ function bindQualificationCustomAdd() {
     });
 }
 
-
 function bindProfilePicPreview() {
     const $input = $("#profilepic");
     const $label = $("#profile-pic");
@@ -249,7 +248,6 @@ function bindProfilePicPreview() {
         resetPreview();
     });
 }
-
 
 // ---------- Countries & Cities via CountriesNow ----------
 const CN_BASE = "https://countriesnow.space/api/v0.1/countries";
@@ -428,6 +426,7 @@ function initOrgBox() {
     $(document).off(".orgEsc").on("keydown.orgEsc", e => { if (e.key === "Escape") hideBox(); });
 }
 // ---------- Generic Field Error Helpers ----------
+
 function clearAllFieldErrors() {
     $(".field-error").remove();
     $(".is-invalid").removeClass("is-invalid");

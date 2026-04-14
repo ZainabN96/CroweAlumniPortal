@@ -103,6 +103,8 @@ namespace CroweAlumniPortal.Models
         public DateTime? ApprovedAt { get; set; }
         public string? ApprovedBy { get; set; }
         public string? RejectionReason { get; set; }
+        public string? ResetPasswordToken { get; set; }
+        public DateTime? ResetPasswordTokenExpiry { get; set; }
 
     }
     public enum UserApprovalStatus

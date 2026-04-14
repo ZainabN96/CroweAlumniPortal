@@ -6,6 +6,7 @@ using CroweAlumniPortal.Errors;
 using CroweAlumniPortal.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -141,6 +142,123 @@ namespace CroweAlumniPortal.Controllers.api
 
             var count = await uow.UserService.CountAsync(s);
             return Ok(new { count });
+        }
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await uow.UserService.GetByEmailAsync(model.EmailAddress);
+
+            if (user == null)
+            {
+                return BadRequest(new APIError
+                {
+                    ErrorCode = 400,
+                    ErrorMessage = "User does not exist"
+                });
+            }
+
+            var token = Guid.NewGuid().ToString();
+
+            user.ResetPasswordToken = token;
+            user.ResetPasswordTokenExpiry = DateTime.UtcNow.AddHours(1);
+
+            await uow.SaveAsync();
+
+            //var resetLink = $"https://hrms.crowe.pk/reset-password?token={token}";
+            var resetLink = $"{Request.Scheme}://{Request.Host}/ResetPassword/Index?token={token}";
+
+            var subject = "Reset Password";
+            var body = $@"
+                        <p>Hello {user.FirstName} {user.LastName},</p>
+                        <p>Click the link below to reset your password:</p>
+                        <p><a href='{resetLink}'>Reset Password</a></p>
+                        <p>This link will expire in 1 hour.</p>";
+
+            await mailService.SendEmailAsync(new MailRequestDto
+            {
+                ToEmail = user.EmailAddress,
+                Subject = subject,
+                Body = body
+            });
+
+            return Ok(new
+            {
+                Message = "Reset password email sent successfully"
+            });
+        }
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await uow.UserService.GetByResetTokenAsync(model.Token);
+
+            if (user == null)
+            {
+                return BadRequest(new APIError
+                {
+                    ErrorCode = 400,
+                    ErrorMessage = "Invalid token"
+                });
+            }
+
+            if (user.ResetPasswordTokenExpiry == null || user.ResetPasswordTokenExpiry < DateTime.UtcNow)
+            {
+                return BadRequest(new APIError
+                {
+                    ErrorCode = 400,
+                    ErrorMessage = "Token has expired"
+                });
+            }
+
+            user.Password = model.NewPassword; 
+            user.ResetPasswordToken = null;
+            user.ResetPasswordTokenExpiry = null;
+
+            await uow.SaveAsync();
+
+            return Ok(new
+            {
+                Message = "Password reset successfully"
+            });
+        }
+        [HttpPost("send-reset-password-email/{emailAddress}")]
+        public async Task<IActionResult> SendResetPasswordEmail(string emailAddress)
+        {
+            var user = await uow.UserService.GetByEmailAsync(emailAddress);
+
+            if (user == null)
+            {
+                return BadRequest(new APIError
+                {
+                    ErrorCode = 400,
+                    ErrorMessage = "User does not exist"
+                });
+            }
+
+            var token = Guid.NewGuid().ToString();
+
+            user.ResetPasswordToken = token;
+            user.ResetPasswordTokenExpiry = DateTime.UtcNow.AddHours(1);
+
+            await uow.SaveAsync();
+
+            var resetLink = $"https://yourfrontendurl.com/reset-password?token={token}";
+
+            await mailService.SendEmailAsync(new MailRequestDto
+            {
+                ToEmail = user.EmailAddress,
+                Subject = "Reset Password",
+                Body = $"Click here to reset your password: <a href='{resetLink}'>Reset Password</a>"
+            });
+            return Ok(new
+            {
+                Message = "Reset password email sent successfully"
+            });
         }
     }
 }

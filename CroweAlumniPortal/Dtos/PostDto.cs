@@ -13,6 +13,7 @@
         public DateTime LastUpdatedOn { get; set; }
         public int? LastUpdatedBy { get; set; }
         public bool? IsActive { get; set; }
+        //public List<IFormFile> Media { get; set; } = new();
     }
     public class CommentDto
     {

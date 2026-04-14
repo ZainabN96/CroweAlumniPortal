@@ -21,7 +21,7 @@ namespace CroweAlumniPortal.Data
         public DbSet<Conversation> Conversations { get; set; }
         public DbSet<ConversationMember> ConversationMembers { get; set; }
         public DbSet<Message> Messages { get; set; }
-
+        //public DbSet<PostMedia> postMedias { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
